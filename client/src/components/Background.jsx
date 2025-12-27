@@ -1,3 +1,4 @@
+import React from "react";
 export default function Background({ children }) {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black">
