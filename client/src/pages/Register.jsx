@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Background from "../components/Background";
+import { Link } from "react-router-dom";
 
 export default function Register() {
   const [role, setRole] = useState("student");
@@ -7,9 +8,7 @@ export default function Register() {
   return (
     <Background>
       <div className="min-h-screen flex items-center justify-center px-4">
-        
         <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-950/80 backdrop-blur-xl shadow-2xl">
-          
           {/* Header */}
           <div className="px-6 pt-6">
             <h1 className="text-2xl font-semibold text-white tracking-tight">
@@ -22,7 +21,6 @@ export default function Register() {
 
           {/* Form */}
           <div className="px-6 py-6 space-y-4">
-            
             {/* Name */}
             <div className="space-y-1">
               <label className="text-sm text-neutral-300">Full name</label>
@@ -57,7 +55,6 @@ export default function Register() {
             <div className="space-y-2">
               <label className="text-sm text-neutral-300">Account type</label>
               <div className="grid grid-cols-2 gap-3">
-                
                 <button
                   type="button"
                   onClick={() => setRole("student")}
@@ -83,23 +80,23 @@ export default function Register() {
                 >
                   Educator
                 </button>
-
               </div>
             </div>
 
             {/* Submit */}
-            <button
-              className="mt-4 w-full rounded-lg bg-white py-2.5 text-sm font-semibold text-black hover:bg-neutral-200 transition"
-            >
+            <button className="mt-4 w-full rounded-lg bg-white py-2.5 text-sm font-semibold text-black hover:bg-neutral-200 transition">
               Create account
             </button>
 
             {/* Footer */}
             <p className="pt-2 text-center text-xs text-neutral-500">
               Already have an account?{" "}
-              <span className="text-white hover:underline cursor-pointer">
+              <Link
+                to="/login"
+                className="text-white hover:underline cursor-pointer"
+              >
                 Sign in
-              </span>
+              </Link>
             </p>
           </div>
         </div>

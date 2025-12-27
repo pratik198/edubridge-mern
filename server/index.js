@@ -1,24 +1,27 @@
-const express = require('express');
-const mongoose = require('mongoose');
-require('dotenv').config();
-
+const express = require("express");
+const mongoose = require("mongoose");
+require("dotenv").config();
+const authRoutes = require("./routes/authRoutes");
 const app = express();
-const port = process.env.PORT || 3000;
 
+// --- middleware ---
 app.use(express.json());
 
-const mongoUri =
-  process.env.MONGODB_URI ||
-  'mongodb+srv://bushra:99377%40aa@cluster0.8db7mbz.mongodb.net/?appName=Cluster0';
+// --- routes ---
+app.use("/api/auth", authRoutes);
 
+// --- db connection ---
+const mongoUri = process.env.MONGODB_URI;
 mongoose
   .connect(mongoUri)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
     process.exit(1);
   });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+// ---server ---
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
 });
