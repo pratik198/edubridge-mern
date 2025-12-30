@@ -46,7 +46,7 @@ const OnboardingStep4 = () => {
                 {n}
               </div>
 
-              {n !== 4 && <div className="w-8 sm:w-12 h-[2px] bg-gray-300" />}
+              {n !== 4 && <div className="w-8 sm:w-12 h-0.5 bg-gray-300" />}
             </div>
           ))}
         </div>
@@ -54,7 +54,7 @@ const OnboardingStep4 = () => {
 
       {/* MAIN CONTENT */}
       <div className="mt-10 sm:mt-12 w-full flex justify-center px-4">
-        <div className="w-full max-w-[720px] basis-[content] mx-auto flex flex-col gap-6">
+        <div className="w-full max-w-180 basis-[content] mx-auto flex flex-col gap-6">
           {/* HEADING */}
           <h1 className="text-2xl sm:text-3xl font-semibold">
             What’s your highest level of education?
