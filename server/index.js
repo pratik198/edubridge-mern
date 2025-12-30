@@ -2,7 +2,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const authRoutes = require("./routes/authRoutes");
-const onboardingRoutes = require("./routes/onboardingRoutes");
+
+const studentOnboardingRoutes = require("./routes/studentOnboardingRoutes");
+const teacherOnboardingRoutes = require("./routes/teacherOnboardingRoutes");
+
 const app = express();
 
 // --- middleware ---
@@ -11,7 +14,9 @@ app.use(express.json());
 // --- routes ---
 app.use("/api/auth", authRoutes);
 
-app.use("/api/onboarding", onboardingRoutes);
+
+app.use("/api/student-onboarding", studentOnboardingRoutes);
+app.use("/api/teacher-onboarding", teacherOnboardingRoutes);
 
 
 // --- db connection ---
