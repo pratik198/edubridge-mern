@@ -2,10 +2,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./screens/auth/login/Login";
 import Register from "./screens/auth/register/Register";
-import OnBording from "./screens/auth/register/OnBording";
-import OnboardingStep2 from "./screens/auth/register/OnboardingStep2";
-import OnboardingStep3 from "./screens/auth/register/OnboardingStep3";
-import OnboardingStep4 from "./screens/auth/register/OnboardingStep4";
+
+import Onboarding from "./screens/auth/register/studentOnboarding.jsx/OnBording";
+import OnboardingStep2 from "./screens/auth/register/studentOnboarding.jsx/OnboardingStep2";
+import OnboardingStep3 from "./screens/auth/register/studentOnboarding.jsx/OnboardingStep3";
+import OnboardingStep4 from "./screens/auth/register/studentOnboarding.jsx/OnboardingStep4";
 import TeacherOnboarding from "./screens/auth/register/teacherOnBoarding/TeacherOnboarding";
 import TeachingPreferences from "./screens/auth/register/teacherOnBoarding/TeachingPreferences";
 const App = () => {
@@ -14,7 +15,7 @@ const App = () => {
       <Route path="/" element={<Navigate to="/register" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/onboarding" element={<OnBording />} />
+      <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/onboarding-step-2" element={<OnboardingStep2 />} />
       <Route path="/onboarding-step-3" element={<OnboardingStep3 />} />
       <Route path="/onboarding-step-4" element={<OnboardingStep4 />} />

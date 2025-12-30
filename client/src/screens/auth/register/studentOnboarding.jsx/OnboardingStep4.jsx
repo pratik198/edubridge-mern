@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
-
-import Logo from "../../../assets/images/eda-logo.png";
-import StarsTop from "../../../assets/images/stars-top.png.png";
-import StarsBottom from "../../../assets/images/stars-bottom.png";
+import assets from "../../../../assets/assets";
 
 const EDUCATION = [
   "Less than high school diploma",
@@ -20,20 +17,22 @@ const OnboardingStep4 = () => {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
-
       {/* ⭐ STARS */}
-      <img src={StarsTop} className="hidden lg:block absolute right-6 top-0 w-36" alt="" />
+      <img
+        src={assets.starsTop}
+        className="hidden lg:block absolute right-6 top-0 w-36"
+        alt=""
+      />
       {/* <img src={StarsBottom} className="hidden lg:block absolute left-6 bottom-10 w-36" alt="" /> */}
 
       {/* LOGO */}
-      <div className="px-6 sm:px-8 pt-6">
-        <img src={Logo} alt="EdA" className="h-7 sm:h-8" />
-      </div>
+      <h1 className="absolute top-6 left-6 text-2xl text-yellow-500 font-['Pacifico']! z-10">
+        EduBridge
+      </h1>
 
       {/* PROGRESS */}
       <div className="mt-6 sm:mt-8 flex justify-center px-4">
         <div className="flex items-center gap-4 sm:gap-6">
-
           {[1, 2, 3, 4].map((n) => (
             <div key={n} className="flex items-center gap-2 sm:gap-3">
               <div
@@ -47,19 +46,15 @@ const OnboardingStep4 = () => {
                 {n}
               </div>
 
-              {n !== 4 && (
-                <div className="w-8 sm:w-12 h-[2px] bg-gray-300" />
-              )}
+              {n !== 4 && <div className="w-8 sm:w-12 h-0.5 bg-gray-300" />}
             </div>
           ))}
-
         </div>
       </div>
 
       {/* MAIN CONTENT */}
       <div className="mt-10 sm:mt-12 w-full flex justify-center px-4">
-       <div className="w-full max-w-[720px] basis-[content] mx-auto flex flex-col gap-6">
-
+        <div className="w-full max-w-180 basis-[content] mx-auto flex flex-col gap-6">
           {/* HEADING */}
           <h1 className="text-2xl sm:text-3xl font-semibold">
             What’s your highest level of education?
@@ -67,7 +62,6 @@ const OnboardingStep4 = () => {
 
           {/* OPTIONS */}
           <div className="space-y-3">
-
             {EDUCATION.map((item) => {
               const active = selected === item;
 
@@ -101,14 +95,12 @@ const OnboardingStep4 = () => {
                 </button>
               );
             })}
-
           </div>
         </div>
       </div>
 
       {/* FOOTER BUTTONS */}
       <div className="flex justify-between px-6 sm:px-10 pb-10 mt-auto">
-
         {/* BACK */}
         <button
           onClick={() => navigate("/onboarding-step-3")}
@@ -134,7 +126,6 @@ const OnboardingStep4 = () => {
           Finished
           <FiArrowRight />
         </button>
-
       </div>
     </div>
   );
