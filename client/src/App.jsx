@@ -6,6 +6,8 @@ import OnBording from "./screens/auth/register/OnBording";
 import OnboardingStep2 from "./screens/auth/register/OnboardingStep2";
 import OnboardingStep3 from "./screens/auth/register/OnboardingStep3";
 import OnboardingStep4 from "./screens/auth/register/OnboardingStep4";
+import TeacherOnboarding from "./screens/auth/register/teacherOnBoarding/TeacherOnboarding";
+import TeachingPreferences from "./screens/auth/register/teacherOnBoarding/TeachingPreferences";
 const App = () => {
   return (
     <Routes>
@@ -16,6 +18,8 @@ const App = () => {
       <Route path="/onboarding-step-2" element={<OnboardingStep2 />} />
       <Route path="/onboarding-step-3" element={<OnboardingStep3 />} />
       <Route path="/onboarding-step-4" element={<OnboardingStep4 />} />
+      <Route path="/teacher-onboarding" element={<TeacherOnboarding />} />
+      <Route path="/teaching-preferences" element={<TeachingPreferences />} />
     </Routes>
   );
 };

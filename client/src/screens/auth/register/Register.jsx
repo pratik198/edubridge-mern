@@ -134,7 +134,7 @@ const Register = () => {
           </label>
 
           {/* BUTTON */}
-          <Link to = "/onboarding" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-3 rounded-lg transition">
+          <Link to = "/teacher-onboarding" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-3 rounded-lg transition">
             Create Account
           </Link>
 
