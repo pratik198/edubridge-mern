@@ -117,8 +117,8 @@
 //                   key={item}
 //                   onClick={() => toggle(item)}
 //                   className={`
-//                     flex items-center gap-1.5 
-//                     border rounded-lg 
+//                     flex items-center gap-1.5
+//                     border rounded-lg
 //                     px-3 py-1.5
 //                     text-xs
 //                     transition
@@ -180,15 +180,11 @@
 
 // export default OnboardingStep2;
 
-
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiPlus, FiArrowRight, FiArrowLeft, FiSearch } from "react-icons/fi";
 
-import Logo from "../../../assets/images/eda-logo.png";
-import StarsTop from "../../../assets/images/stars-top.png.png";
-import StarsBottom from "../../../assets/images/stars-bottom.png";
+import assets from "../../../../assets/assets";
 
 const INTERESTS = {
   Tech: ["Web Dev", "Mobile Dev", "UI/UX", "AI", "Cybersecurity"],
@@ -212,24 +208,21 @@ const OnboardingStep2 = () => {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
-
       {/* ⭐ STARS */}
       <img
-        src={StarsTop}
+        src={assets.starsTop}
         className="hidden lg:block absolute right-6 top-0 w-36"
         alt=""
       />
-      
 
       {/* LOGO */}
-      <div className="px-6 sm:px-8 pt-6">
-        <img src={Logo} alt="EdA" className="h-7 sm:h-8" />
-      </div>
+      <h1 className="absolute top-6 left-6 text-2xl text-yellow-500 font-['Pacifico']! z-10">
+        EduBridge
+      </h1>
 
       {/* PROGRESS BAR */}
       <div className="mt-6 sm:mt-8 flex justify-center px-4">
         <div className="flex items-center gap-4 sm:gap-6">
-
           {[1, 2, 3, 4].map((n) => (
             <div key={n} className="flex items-center gap-2 sm:gap-3">
               <div
@@ -243,28 +236,22 @@ const OnboardingStep2 = () => {
                 {n}
               </div>
 
-              {n !== 4 && (
-                <div className="w-8 sm:w-12 h-[2px] bg-gray-300" />
-              )}
+              {n !== 4 && <div className="w-8 sm:w-12 h-[2px] bg-gray-300" />}
             </div>
           ))}
-
         </div>
       </div>
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="mt-10 sm:mt-12 w-full flex justify-center px-4">
         <div className="w-full max-w-[720px] flex flex-col items-center gap-5 sm:gap-6">
-
           {/* HEADING */}
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-semibold">
               Pick your areas of interest
             </h1>
 
-            <p className="text-gray-500 mt-2 text-sm">
-              Select up to 5 options
-            </p>
+            <p className="text-gray-500 mt-2 text-sm">Select up to 5 options</p>
           </div>
 
           {/* SEARCH BAR */}
@@ -284,10 +271,8 @@ const OnboardingStep2 = () => {
           {/* ===== INTEREST LIST (CENTERED) ===== */}
           <div className="w-full flex justify-center">
             <div className=" max-w-[720px] text-left space-y-4">
-
               {Object.entries(INTERESTS).map(([category, list]) => (
                 <div key={category} className="space-y-2">
-
                   <p className="font-medium text-sm">{category}</p>
 
                   <div className="flex flex-wrap gap-2">
@@ -321,10 +306,8 @@ const OnboardingStep2 = () => {
                         );
                       })}
                   </div>
-
                 </div>
               ))}
-
             </div>
           </div>
         </div>
@@ -332,7 +315,6 @@ const OnboardingStep2 = () => {
 
       {/* ===== FOOTER BUTTONS ===== */}
       <div className="flex justify-between px-6 sm:px-10 pb-8 sm:pb-10 mt-auto">
-
         {/* BACK BUTTON */}
         <button
           onClick={() => navigate("/onboarding")}
