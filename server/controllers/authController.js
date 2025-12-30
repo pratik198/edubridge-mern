@@ -8,78 +8,117 @@ const registerUser = async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
 
-    // --- ALL FIELDS ---
+    // ---- VALIDATION ----
     if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    // --- EMAIL ---
     if (!isValidEmail(email)) {
-      return res.status(400).json({ message: "Invalid email" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
     }
 
-    // --- PSSWRD ---
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password too short" });
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
     }
 
-    // --- ENUM ROLE ---
     if (role && !["student", "educator"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role",
+      });
     }
 
-    // --- ALREADY EXISTING ---
+    // ---- CHECK EXISTING USER ----
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "Email already exists" });
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered",
+      });
     }
 
-    // --- HASHED PSSWRD ---
+    // ---- HASH PASSWORD ----
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // --- FINALLY CREATE USER ----
-    await User.create({
+    // ---- CREATE USER ----
+    const user = await User.create({
       fullName,
       email,
       password: hashedPassword,
       role,
     });
 
-    res.status(201).json({ message: "User registered successfully" });
+    // ---- SIGN TOKEN ----
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    // ---- RESPONSE ----
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
-// ================= LOGIN =================
+// ================= LOGIN ================
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // --- ALL FIELDS ---
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
     }
 
-    //  --- EMAIL ---
-    // ----- VALIDATE EMAIL -----
     if (!isValidEmail(email)) {
-      return res.status(400).json({ message: "Invalid email" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
     }
 
-    // ----- VALID USER -----
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
     }
 
-    // --- PSSWRD ---
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid password" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
     }
 
-    // --- TOKEN SIGN ---
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -87,17 +126,21 @@ const loginUser = async (req, res) => {
     );
 
     res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
       user: {
         id: user._id,
         fullName: user.fullName,
-        role: user.role,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
