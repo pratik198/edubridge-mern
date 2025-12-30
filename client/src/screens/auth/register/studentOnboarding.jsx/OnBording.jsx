@@ -138,14 +138,10 @@
 
 // export default Onboarding;
 
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiPlus, FiArrowRight } from "react-icons/fi";
-
-import Logo from "../../../assets/images/eda-logo.png";
-import StarsTop from "../../../assets/images/stars-top.png.png";
-import StarsBottom from "../../../assets/images/stars-bottom.png";
+import assets from "../../../../assets/assets";
 
 const OPTIONS = [
   "Learn something new",
@@ -171,29 +167,27 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
-
       {/* ⭐ STARS — show only tablet+ */}
       <img
-        src={StarsTop}
+        src={assets.starsTop}
         className="hidden md:block absolute right-6 top-0 w-36 pointer-events-none"
         alt=""
       />
 
       <img
-        src={StarsBottom}
+        src={assets.starsTop}
         className="hidden md:block absolute left-6 bottom-10 w-36 pointer-events-none"
         alt=""
       />
 
       {/* LOGO */}
-      <div className="px-6 pt-5 sm:px-8 sm:pt-6">
-        <img src={Logo} alt="EdA" className="h-7 sm:h-8 object-contain" />
-      </div>
+      <h1 className="absolute top-6 left-6 text-2xl text-yellow-500 font-['Pacifico']! z-10">
+        EduBridge
+      </h1>
 
       {/* PROGRESS */}
       <div className="mt-6 flex justify-center px-4">
         <div className="flex items-center gap-4 sm:gap-6">
-
           {[1, 2, 3, 4].map((step) => (
             <div key={step} className="flex items-center gap-2 sm:gap-3">
               <div
@@ -217,17 +211,15 @@ const Onboarding = () => {
 
       {/* MAIN CONTENT */}
       <div className="flex flex-col items-center text-center mt-8 sm:mt-10 px-5 sm:px-6 flex-1">
-
         <h1 className="text-2xl sm:text-3xl font-semibold leading-snug">
           What brings you here?
         </h1>
 
-        <p className="text-gray-500 mt-2 text-sm">
-          Select up to 2 options
-        </p>
+        <p className="text-gray-500 mt-2 text-sm">Select up to 2 options</p>
 
         {/* OPTIONS */}
-        <div className="
+        <div
+          className="
           grid 
           grid-cols-1 
           sm:grid-cols-2 
@@ -238,8 +230,8 @@ const Onboarding = () => {
           sm:mt-14 
           w-full 
           max-w-6xl
-        ">
-
+        "
+        >
           {OPTIONS.map((item, i) => {
             const active = selected.includes(item);
 
