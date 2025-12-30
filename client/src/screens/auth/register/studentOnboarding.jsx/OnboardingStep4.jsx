@@ -19,7 +19,7 @@ const OnboardingStep4 = () => {
     <div className="min-h-screen bg-white relative overflow-hidden flex flex-col">
       {/* ⭐ STARS */}
       <img
-        src={assets.StarsTop}
+        src={assets.starsTop}
         className="hidden lg:block absolute right-6 top-0 w-36"
         alt=""
       />
