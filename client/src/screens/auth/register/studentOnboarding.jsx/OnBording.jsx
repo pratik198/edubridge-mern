@@ -201,9 +201,7 @@ const Onboarding = () => {
                 {step}
               </div>
 
-              {step !== 4 && (
-                <div className="w-8 sm:w-12 h-[2px] bg-gray-300" />
-              )}
+              {step !== 4 && <div className="w-8 sm:w-12 h-0.5 bg-gray-300" />}
             </div>
           ))}
         </div>

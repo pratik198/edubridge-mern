@@ -236,7 +236,7 @@ const OnboardingStep2 = () => {
                 {n}
               </div>
 
-              {n !== 4 && <div className="w-8 sm:w-12 h-[2px] bg-gray-300" />}
+              {n !== 4 && <div className="w-8 sm:w-12 h-0.5 bg-gray-300" />}
             </div>
           ))}
         </div>
@@ -244,7 +244,7 @@ const OnboardingStep2 = () => {
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="mt-10 sm:mt-12 w-full flex justify-center px-4">
-        <div className="w-full max-w-[720px] flex flex-col items-center gap-5 sm:gap-6">
+        <div className="w-full max-w-180 flex flex-col items-center gap-5 sm:gap-6">
           {/* HEADING */}
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-semibold">
@@ -255,7 +255,7 @@ const OnboardingStep2 = () => {
           </div>
 
           {/* SEARCH BAR */}
-          <div className="w-full max-w-[520px] flex items-center border border-yellow-300 rounded-full px-4 py-2 shadow-sm">
+          <div className="w-full max-w-130 flex items-center border border-yellow-300 rounded-full px-4 py-2 shadow-sm">
             <input
               className="flex-1 outline-none text-sm"
               placeholder="Find an interest"
@@ -270,7 +270,7 @@ const OnboardingStep2 = () => {
 
           {/* ===== INTEREST LIST (CENTERED) ===== */}
           <div className="w-full flex justify-center">
-            <div className=" max-w-[720px] text-left space-y-4">
+            <div className=" max-w-180 text-left space-y-4">
               {Object.entries(INTERESTS).map(([category, list]) => (
                 <div key={category} className="space-y-2">
                   <p className="font-medium text-sm">{category}</p>
