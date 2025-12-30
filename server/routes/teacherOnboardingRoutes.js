@@ -2,7 +2,7 @@ const express = require("express");
 const auth = require("../middleware/authMiddleware");
 const {
   saveTeacherOnboarding,
-  getTeacherOnboarding
+  getTeacherOnboarding,
 } = require("../controllers/teacherOnboardingController");
 
 const router = express.Router();
