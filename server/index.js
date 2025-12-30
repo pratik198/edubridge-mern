@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 require("dotenv").config();
 const authRoutes = require("./routes/authRoutes");
 
@@ -9,15 +10,14 @@ const teacherOnboardingRoutes = require("./routes/teacherOnboardingRoutes");
 const app = express();
 
 // --- middleware ---
+app.use(cors());
 app.use(express.json());
 
 // --- routes ---
 app.use("/api/auth", authRoutes);
 
-
 app.use("/api/student-onboarding", studentOnboardingRoutes);
 app.use("/api/teacher-onboarding", teacherOnboardingRoutes);
-
 
 // --- db connection ---
 const mongoUri = process.env.MONGODB_URI;
