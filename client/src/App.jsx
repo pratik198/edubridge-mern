@@ -3,10 +3,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./screens/auth/login/Login";
 import Register from "./screens/auth/register/Register";
 
-import Onboarding from "./screens/auth/register/studentOnboarding.jsx/OnBording";
-import OnboardingStep2 from "./screens/auth/register/studentOnboarding.jsx/OnboardingStep2";
-import OnboardingStep3 from "./screens/auth/register/studentOnboarding.jsx/OnboardingStep3";
-import OnboardingStep4 from "./screens/auth/register/studentOnboarding.jsx/OnboardingStep4";
+import Onboarding from "./screens/auth/register/studentOnboarding/OnBording";
+import OnboardingStep2 from "./screens/auth/register/studentOnboarding/OnboardingStep2";
+import OnboardingStep3 from "./screens/auth/register/studentOnboarding/OnboardingStep3";
+import OnboardingStep4 from "./screens/auth/register/studentOnboarding/OnboardingStep4";
 import TeacherOnboarding from "./screens/auth/register/teacherOnBoarding/TeacherOnboarding";
 import TeachingPreferences from "./screens/auth/register/teacherOnBoarding/TeachingPreferences";
 const App = () => {
