@@ -16,33 +16,49 @@ exports.saveTeacherOnboarding = async (req, res) => {
       audience, // array
     } = req.body;
 
-    const onboardingData = {
-      user: userId,
-      country,
-      profession,
-      experience,
-      expertise: expertise || [],
-      defaultLanguage,
-      courseFormat: courseFormat || [],
-      audience: audience || [],
-    };
-
     const onboarding = await TeacherOnboarding.findOneAndUpdate(
       { user: userId },
-      onboardingData,
+      {
+        user: userId,
+        country,
+        profession,
+        experience,
+        expertise: expertise || [],
+        defaultLanguage,
+        courseFormat: courseFormat || [],
+        audience: audience || [],
+      },
       { upsert: true, new: true }
     );
 
     res.status(200).json({
       success: true,
-      message: "Teacher onboarding saved successfully",
-      onboarding,
+      action: "Teacher onboardign saved successfully.",
+      data: {
+        _id: onboarding._id, // document id
+        userId: onboarding.user, // user reference
+        createdAt: onboarding.createdAt,
+        updatedAt: onboarding.updatedAt,
+        teacher: {
+          profile: {
+            country: onboarding.country,
+            profession: onboarding.profession,
+            experience: onboarding.experience,
+          },
+          teachingPreferences: {
+            expertise: onboarding.expertise,
+            defaultLanguage: onboarding.defaultLanguage,
+            courseFormat: onboarding.courseFormat,
+            audience: onboarding.audience,
+          },
+        },
+      },
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to save teacher onboarding details.",
     });
   }
 };
@@ -56,15 +72,41 @@ exports.getTeacherOnboarding = async (req, res) => {
       user: req.user.id,
     });
 
+    if (!onboarding) {
+      return res.status(404).json({
+        success: false,
+        message: "Teacher onboarding not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
-      onboarding,
+      action: "Teacher onboarding details fetched successfully.",
+      data: {
+        _id: onboarding._id,
+        userId: onboarding.user,
+        createdAt: onboarding.createdAt,
+        updatedAt: onboarding.updatedAt,
+        teacher: {
+          profile: {
+            country: onboarding.country,
+            profession: onboarding.profession,
+            experience: onboarding.experience,
+          },
+          teachingPreferences: {
+            expertise: onboarding.expertise,
+            defaultLanguage: onboarding.defaultLanguage,
+            courseFormat: onboarding.courseFormat,
+            audience: onboarding.audience,
+          },
+        },
+      },
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to fetch teacher onboarding details.",
     });
   }
 };
