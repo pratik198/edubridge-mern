@@ -27,7 +27,7 @@
 
 // export default App;
 import React from 'react'
-import StudentDashboard from './pages/StudentDashboard'
+import StudentDashboard from './screens/dashboard/student/StudentHome'
 
 const App = () => {
   return (
