@@ -1,12 +1,12 @@
 
-import Navbar from "../../../components/Navbar";
-import Hero from "../../../components/Hero";
-import SectionTitle from "../../../components/SectionTitle";
-import CourseGrid from "../../../components/CourseGrid";
-import CategoryCard from "../../../components/CategoryCard";
-import TestimonialCard from "../../../components/TestimonialCard";
-import Footer from "../../../components/Footer";
-import SeeMoreButton from "../../../components/SeeMoreButton";
+import Navbar from "../../../components/studentcomponents/Navbar";
+import Hero from "../../../components/studentcomponents/Hero";
+import SectionTitle from "../../../components/studentcomponents/SectionTitle";
+import CourseGrid from "../../../components/studentcomponents/CourseGrid";
+import CategoryCard from "../../../components/studentcomponents/CategoryCard";
+import TestimonialCard from "../../../components/studentcomponents/TestimonialCard";
+import Footer from "../../../components/studentcomponents/Footer";
+import SeeMoreButton from "../../../components/studentcomponents/SeeMoreButton";
 
 export default function StudentDashboard() {
   return (
