@@ -32,7 +32,10 @@ const Register = () => {
     try {
       const response = await registerUser(form);
 
-      if (response?.success) {
+      if (response?.success && response?.token) {
+        // ✅ STORE TOKEN (THIS WAS MISSING)
+        localStorage.setItem("token", response.token);
+
         if (form.role === "student") {
           navigate("/onboarding");
         } else if (form.role === "educator") {
