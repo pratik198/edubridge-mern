@@ -26,15 +26,17 @@
 // };
 
 // export default App;
-import React from 'react'
-import StudentDashboard from './pages/StudentDashboard'
+import React from "react";
+import StudentDashboard from "./pages/StudentDashboard";
+import TeacherDashboard from "./screens/teacher/dashboard/TeacherDashboard";
 
 const App = () => {
   return (
     <div>
-      <StudentDashboard />
+      {/* <StudentDashboard /> */}
+      <TeacherDashboard />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
