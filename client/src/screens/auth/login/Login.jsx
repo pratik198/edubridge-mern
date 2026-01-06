@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import assets from "../../../assets/assets";
 import { loginUser } from "../../../apis/authApi";
-
 import { MdOutlineMailOutline, MdOutlineLock } from "react-icons/md";
 import { AiOutlineEye } from "react-icons/ai";
 
@@ -29,7 +28,7 @@ const Login = () => {
       const response = await loginUser(form);
 
       if (response?.success) {
-        navigate("/onboarding");
+        navigate("/student-dashboard");
       }
     } catch (err) {
       setError(
