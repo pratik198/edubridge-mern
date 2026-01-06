@@ -10,7 +10,10 @@ body {
   font-family: "Inter", system-ui, sans-serif;
   background: #ffffff;
   color: #0f172a;
+   font-family: "Poppins", sans-serif;
 }
+
+
 @layer utilities {
   .animate-fade-in {
     animation: fade .6s ease forwards;

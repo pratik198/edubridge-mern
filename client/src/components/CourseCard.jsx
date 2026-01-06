@@ -1,22 +1,55 @@
 import { AiFillStar } from "react-icons/ai";
 
-export default function CourseCard({ title, author, price }) {
+export default function CourseCard({
+  image = "https://picsum.photos/400/300",
+  author = "Course Instructor",
+  title = "Course Title",
+  rating = "4.8",
+  duration = "5h 30m",
+  level = "Beginner"
+}) {
   return (
-    <div className="border rounded-xl p-3 shadow-sm hover:shadow-md transition bg-white">
-
-      <img
-        className="rounded-lg"
-        src="https://picsum.photos/300/200"
-      />
-
-      <p className="text-sm font-semibold mt-3">{title}</p>
-      <p className="text-gray-500 text-xs mt-1">{author}</p>
-
-      <div className="flex gap-1 mt-2 text-yellow-400 text-sm">
-        {[1, 2, 3, 4, 5].map(i => <AiFillStar key={i} />)}
+    <div
+      className="
+        rounded-2xl
+        p-4
+        bg-white
+        border
+        border-gray-200
+        shadow-[0_6px_24px_rgba(0,0,0,0.06)]
+        hover:shadow-[0_12px_32px_rgba(0,0,0,0.10)]
+        hover:-translate-y-[4px]
+        transition-all
+        duration-300
+        cursor-pointer
+      "
+    >
+      {/* IMAGE */}
+      <div className="overflow-hidden rounded-xl">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-48 object-cover hover:scale-105 transition duration-500"
+        />
       </div>
 
-      <p className="font-semibold mt-2 text-sm">${price}</p>
+      {/* AUTHOR */}
+      <p className="text-gray-500 text-sm mt-3">{author}</p>
+
+      {/* TITLE */}
+      <h3 className="font-semibold text-lg mt-1 leading-snug text-gray-900">
+        {title}
+      </h3>
+
+      {/* META */}
+      <div className="flex items-center gap-2 text-sm text-gray-600 mt-3">
+        <AiFillStar className="text-yellow-400 text-base" />
+        <span className="font-medium">{rating}</span>
+        <span>•</span>
+        <span>{duration}</span>
+        <span>•</span>
+        <span>{level}</span>
+      </div>
     </div>
   );
 }
