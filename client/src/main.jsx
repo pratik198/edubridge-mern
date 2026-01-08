@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import App from "./App";
 import { store } from "./redux/store/store";
 import "./index.css";
+import "./components/common/charts/chartSetup";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

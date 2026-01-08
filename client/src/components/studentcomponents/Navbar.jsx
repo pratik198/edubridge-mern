@@ -138,7 +138,6 @@
 //   </div>
 // )}
 
-
 //     </header>
 //   );
 // }
@@ -150,11 +149,10 @@ import {
   FiChevronDown,
   FiArrowRight,
   FiMenu,
-  FiX
+  FiX,
 } from "react-icons/fi";
 
 export default function Navbar() {
-
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const menuRef = useRef(null);
@@ -172,13 +170,16 @@ export default function Navbar() {
 
   return (
     <header className="bg-white sticky top-0 z-50">
-
       {/* WRAPPER */}
-      <div className="max-w-7xl mx-auto px-6 py-4
-      flex items-center justify-between gap-6">
-
+      <div
+        className="max-w-7xl mx-auto px-6 py-4
+      flex items-center justify-between gap-6"
+      >
         {/* LOGO */}
-        <img src={assets.logo} alt="EdA" className="w-20" />
+        {/* <img src={assets.logo} alt="EdA" className="w-20" /> */}
+        <h1 className="text-2xl text-yellow-500 font-['Pacifico']!">
+          EduBridge
+        </h1>
 
         {/* SEARCH — ONLY DESKTOP */}
         <div className="hidden lg:flex flex-1 justify-center">
@@ -195,7 +196,6 @@ export default function Navbar() {
 
         {/* RIGHT SIDE (DESKTOP) */}
         <div className="hidden md:flex items-center gap-8">
-
           <nav className="flex items-center gap-6">
             <span className="font-bold text-[15px] cursor-pointer text-black">
               Home
@@ -212,7 +212,6 @@ export default function Navbar() {
 
           {/* PROFILE DROPDOWN */}
           <div ref={menuRef} className="relative">
-
             <div
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => setOpen(!open)}
@@ -245,7 +244,6 @@ export default function Navbar() {
               </div>
             )}
           </div>
-
         </div>
 
         {/* MOBILE MENU BUTTON */}
@@ -255,17 +253,14 @@ export default function Navbar() {
         >
           <FiMenu size={20} />
         </button>
-
       </div>
-
 
       {/* ---------------- MOBILE DRAWER ---------------- */}
       {mobileMenu && (
         <div
-          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-[60]"
+          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-60"
           onClick={() => setMobileMenu(false)}
         >
-
           <div
             className="
               bg-white
@@ -314,7 +309,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-
     </header>
   );
 }

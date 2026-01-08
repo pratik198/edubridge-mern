@@ -10,6 +10,11 @@ import OnboardingStep4 from "./screens/auth/register/studentOnboarding/Onboardin
 import TeacherOnboarding from "./screens/auth/register/teacherOnBoarding/TeacherOnboarding";
 import TeachingPreferences from "./screens/auth/register/teacherOnBoarding/TeachingPreferences";
 import StudentDashboard from "./screens/dashboard/student/StudentHome";
+import TeacherDashboard from "./screens/teacher/dashboard/TeacherDashboard";
+import MyCourses from "./screens/teacher/myCourses/MyCourses";
+import CreateCourseStep1 from "./screens/teacher/createCourse/createCourseStep1";
+import CreateCourseStep2 from "./screens/teacher/createCourse/CreateCourseStep2";
+import CreateCourseStep3 from "./screens/teacher/createCourse/CreateCourseStep3";
 const App = () => {
   return (
     <Routes>
@@ -22,21 +27,44 @@ const App = () => {
       <Route path="/onboarding-step-4" element={<OnboardingStep4 />} />
       <Route path="/teacher-onboarding" element={<TeacherOnboarding />} />
       <Route path="/teaching-preferences" element={<TeachingPreferences />} />
+
+      {/* STUDENT ROUTES */}
       <Route path="/student-dashboard" element={<StudentDashboard />} />
+
+      {/* TEACHER ROUTES */}
+      <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+      <Route path="/t-my-courses" element={<MyCourses />} />
+      <Route
+        path="/teacher/create-course/step-1"
+        element={<CreateCourseStep1 />}
+      />
+      <Route
+        path="/teacher/create-course/step-2"
+        element={<CreateCourseStep2 />}
+      />
+      <Route
+        path="/teacher/create-course/step-3"
+        element={<CreateCourseStep3 />}
+      />
     </Routes>
   );
 };
 
 export default App;
-// import React from 'react'
-// import StudentDashboard from './screens/dashboard/student/StudentHome'
+
+// import React from "react";
+// import MyCourses from "./screens/teacher/myCourses/MyCourses";
+// // import TeacherDashboard from "./screens/teacher/dashboard/TeacherDashboard";
+// // import StudentDashboard from "./screens/dashboard/student/StudentHome";
 
 // const App = () => {
 //   return (
 //     <div>
-//       <StudentDashboard />
+//       {/* <StudentDashboard /> */}
+//       {/* <TeacherDashboard /> */}
+//       <MyCourses />
 //     </div>
-//   )
-// }
+//   );
+// };
 
-// export default App
+// export default App;
