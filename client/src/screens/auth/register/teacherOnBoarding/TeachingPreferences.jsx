@@ -96,7 +96,7 @@ const TeachingPreferences = () => {
       dispatch(resetTeacherOnboarding());
 
       // 4️⃣ Navigate
-      navigate("/dashboard");
+      navigate("/teacher-dashboard");
     } catch (error) {
       console.error("Teacher onboarding failed", error);
     }

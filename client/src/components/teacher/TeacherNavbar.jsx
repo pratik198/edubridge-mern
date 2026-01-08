@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FiMenu, FiX, FiBell } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const TeacherNavbar = () => {
   const [open, setOpen] = useState(false);
@@ -17,10 +18,15 @@ const TeacherNavbar = () => {
         {/* RIGHT SECTION – visible from 768px */}
         <div className="hidden md:flex items-center gap-10">
           <nav className="flex gap-8 text-sm text-gray-500">
-            <span className="text-black font-medium cursor-pointer">
+            <Link
+              to="/teacher-dashboard"
+              className="text-black font-medium cursor-pointer"
+            >
               Dashboard
-            </span>
-            <span className="cursor-pointer">My Courses</span>
+            </Link>
+            <Link to="/t-my-courses" className="cursor-pointer">
+              My Courses
+            </Link>
             <span className="cursor-pointer">Students</span>
             <span className="cursor-pointer">Assessment</span>
           </nav>

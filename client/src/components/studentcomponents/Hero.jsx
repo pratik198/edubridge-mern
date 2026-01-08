@@ -56,7 +56,7 @@
 //   );
 // }
 
-import assets from "../assets/assets";
+import assets from "../../assets/assets";
 
 export default function Hero() {
   return (

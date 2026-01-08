@@ -29,7 +29,12 @@ const Login = () => {
       const response = await loginUser(form);
 
       if (response?.success) {
-        navigate("/onboarding");
+        if (response.user?.role === "educator") {
+          navigate("/teacher-dashboard");
+        } else if (response.user?.role === "student") {
+          navigate("/student-dashboard");
+        }
+        // navigate("/onboarding");
       }
     } catch (err) {
       setError(

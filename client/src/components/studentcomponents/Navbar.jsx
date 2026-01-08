@@ -143,7 +143,7 @@
 // }
 
 import { useEffect, useRef, useState } from "react";
-import assets from "../assets/assets";
+import assets from "../../assets/assets";
 import {
   FiBell,
   FiChevronDown,
