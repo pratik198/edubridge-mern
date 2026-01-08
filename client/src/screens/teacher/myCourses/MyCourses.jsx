@@ -17,7 +17,7 @@ const MyCourses = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">My Courses</h1>
           <button
-            onClick={() => navigate("/create-course-step1")}
+            onClick={() => navigate("/teacher/create-course/step-1")}
             className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-lg font-medium"
           >
             + Create New Course
