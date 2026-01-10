@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiPlus, FiTrash } from "react-icons/fi";
 
-export default function AddQuizForm({ onClose }) {
+const AddQuizForm = ({ onClose, onSave }) => {
   const [quizTitle, setQuizTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -51,6 +51,15 @@ export default function AddQuizForm({ onClose }) {
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
+  const handleDone = () => {
+    onSave({
+      title: quizTitle,
+      description,
+      questions,
+    });
+    onClose();
+  };
+
   return (
     <div className="space-y-8">
       {/* Quiz Title */}
@@ -84,13 +93,7 @@ export default function AddQuizForm({ onClose }) {
         {questions.map((q, qIndex) => (
           <div
             key={qIndex}
-            className="
-              border border-gray-200
-              rounded-2xl
-              p-6
-              bg-white
-              space-y-6
-            "
+            className="border border-gray-200 rounded-2xl p-6 bg-white space-y-6"
           >
             {/* Question Header */}
             <div className="flex justify-between items-center">
@@ -198,17 +201,14 @@ export default function AddQuizForm({ onClose }) {
         </button>
 
         <button
-          className="
-            px-8 py-3
-            bg-yellow-400
-            rounded-xl
-            text-sm
-            font-medium
-          "
+          onClick={handleDone}
+          className="px-8 py-3 bg-yellow-400 rounded-xl text-sm font-medium"
         >
           Done
         </button>
       </div>
     </div>
   );
-}
+};
+
+export default AddQuizForm;
