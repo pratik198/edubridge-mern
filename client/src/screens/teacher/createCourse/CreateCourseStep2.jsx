@@ -1,117 +1,213 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import TeacherNavbar from "../../../components/teacher/TeacherNavbar";
 import Footer from "../../../components/studentcomponents/Footer";
 import CreateCourseSteps from "../../../components/teacher/createCourseComponents/CreateCourseSteps";
-
 import Modal from "../../../components/common/modal/Modal";
 import AddLessonForm from "../../../components/teacher/createCourseComponents/AddLessonForm";
 import AddQuizForm from "../../../components/teacher/createCourseComponents/AddQuizForm";
 
-import { FiPlus, FiMoreVertical, FiMenu } from "react-icons/fi";
+import { FiPlus, FiMenu, FiTrash } from "react-icons/fi";
 
-export default function CreateCourseStep2() {
+const CreateCourseStep2 = () => {
+  const navigate = useNavigate();
+
+  const [modules, setModules] = useState([
+    {
+      id: 1,
+      title: "Module 1",
+      lessons: [],
+      quizzes: [],
+    },
+  ]);
+
+  const [activeModuleIndex, setActiveModuleIndex] = useState(0);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+
+  /* ================= MODULE ================= */
+  const addModule = () => {
+    setModules((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        title: `Module ${prev.length + 1}`,
+        lessons: [],
+        quizzes: [],
+      },
+    ]);
+  };
+
+  const deleteModule = (mIndex) => {
+    if (modules.length === 1) return;
+    setModules((prev) => prev.filter((_, i) => i !== mIndex));
+  };
+
+  /* ================= LESSON ================= */
+  const addLessonToModule = (lesson) => {
+    setModules((prev) =>
+      prev.map((module, index) =>
+        index === activeModuleIndex
+          ? { ...module, lessons: [...module.lessons, lesson] }
+          : module
+      )
+    );
+  };
+
+  const deleteLesson = (mIndex, lIndex) => {
+    setModules((prev) =>
+      prev.map((module, index) =>
+        index === mIndex
+          ? {
+              ...module,
+              lessons: module.lessons.filter((_, i) => i !== lIndex),
+            }
+          : module
+      )
+    );
+  };
+
+  /* ================= QUIZ ================= */
+  const addQuizToModule = (quiz) => {
+    setModules((prev) =>
+      prev.map((module, index) =>
+        index === activeModuleIndex
+          ? { ...module, quizzes: [...module.quizzes, quiz] }
+          : module
+      )
+    );
+  };
+
+  const deleteQuiz = (mIndex, qIndex) => {
+    setModules((prev) =>
+      prev.map((module, index) =>
+        index === mIndex
+          ? {
+              ...module,
+              quizzes: module.quizzes.filter((_, i) => i !== qIndex),
+            }
+          : module
+      )
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white">
       <TeacherNavbar />
 
-      {/* PAGE CONTENT */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10">
         <div className="flex flex-col md:flex-row gap-10 md:gap-20">
-          {/* ===== STEPS ===== */}
-          <div className="block md:hidden">
-            <CreateCourseSteps currentStep={2} orientation="horizontal" />
-          </div>
-
           <div className="hidden md:block">
-            <CreateCourseSteps currentStep={2} orientation="vertical" />
+            <CreateCourseSteps currentStep={2} />
           </div>
 
-          {/* ===== MAIN CONTENT ===== */}
           <div className="flex-1 max-w-full lg:max-w-[820px]">
-            {/* TITLE */}
             <h1 className="text-2xl font-semibold text-black">
               Curriculum Builder
             </h1>
+
             <p className="text-gray-500 mt-2 mb-8 text-sm max-w-[520px]">
               Structure your course by creating modules, lessons, and quizzes.
             </p>
 
-            {/* PREVIEW + ADD MODULE */}
-            <div className="flex flex-col items-start gap-6 mb-6">
-              <button className="text-sm text-blue-600 font-medium">
-                Preview
-              </button>
+            <button
+              onClick={addModule}
+              className="flex items-center gap-2 border border-gray-300 px-5 py-2 rounded-md text-sm"
+            >
+              <FiPlus />
+              Add Module
+            </button>
 
-              <button className="flex items-center gap-2 border border-gray-300 px-5 py-2 rounded-md text-sm hover:border-yellow-400 transition">
-                <FiPlus />
-                Add Module
-              </button>
-            </div>
+            <div className="mt-8 border border-gray-200 rounded-md overflow-hidden bg-gray-50">
+              {modules.map((module, mIndex) => (
+                <div key={module.id}>
+                  {/* MODULE HEADER */}
+                  <div className="px-6 py-3 bg-gray-100 text-sm font-semibold text-gray-800 border-b border-b-gray-200 flex justify-between">
+                    {module.title}
+                    <FiTrash
+                      className="cursor-pointer text-gray-400"
+                      onClick={() => deleteModule(mIndex)}
+                    />
+                  </div>
 
-            {/* ===== MODULE PANEL ===== */}
-            <div className="border border-gray-200 rounded-md overflow-hidden bg-gray-50">
-              {/* MODULE HEADER */}
-              <div className="px-6 py-3 bg-gray-100 text-sm font-semibold text-gray-800 border-b border-b-gray-200">
-                Module 1
-              </div>
+                  {/* LESSONS */}
+                  {module.lessons.map((lesson, lIndex) => (
+                    <div
+                      key={lIndex}
+                      className="bg-white px-6 py-4 flex items-center justify-between border-b border-b-gray-200"
+                    >
+                      <div className="flex items-start gap-4">
+                        <FiMenu className="text-gray-400 mt-1" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {lesson.title}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {lesson.contentType} · {lesson.duration}
+                          </p>
+                        </div>
+                      </div>
+                      <FiTrash
+                        className="text-gray-400 cursor-pointer"
+                        onClick={() => deleteLesson(mIndex, lIndex)}
+                      />
+                    </div>
+                  ))}
 
-              {/* LESSON ROW */}
-              <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-b-gray-200">
-                <div className="flex items-start gap-4">
-                  <FiMenu className="text-gray-400 mt-1" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Lesson 1: Getting Started
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      Video · 5 min
-                    </p>
+                  {/* QUIZZES */}
+                  {module.quizzes.map((quiz, qIndex) => (
+                    <div
+                      key={qIndex}
+                      className="bg-white px-6 py-4 flex items-center justify-between border-b border-b-gray-200"
+                    >
+                      <div className="flex items-start gap-4">
+                        <FiMenu className="text-gray-400 mt-1" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {quiz.title}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            Quiz · {quiz.questions.length} questions
+                          </p>
+                        </div>
+                      </div>
+                      <FiTrash
+                        className="text-gray-400 cursor-pointer"
+                        onClick={() => deleteQuiz(mIndex, qIndex)}
+                      />
+                    </div>
+                  ))}
+
+                  {/* ACTIONS */}
+                  <div className="grid grid-cols-2 text-sm">
+                    <button
+                      onClick={() => {
+                        setActiveModuleIndex(mIndex);
+                        setIsLessonModalOpen(true);
+                      }}
+                      className="py-3 flex items-center justify-center gap-2 bg-white border-r border-r-gray-200"
+                    >
+                      <FiPlus />
+                      Add Lesson
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveModuleIndex(mIndex);
+                        setIsQuizModalOpen(true);
+                      }}
+                      className="py-3 flex items-center justify-center gap-2 bg-white"
+                    >
+                      <FiPlus />
+                      Add Quiz
+                    </button>
                   </div>
                 </div>
-                <FiMoreVertical className="text-gray-400 cursor-pointer" />
-              </div>
-
-              {/* QUIZ ROW */}
-              <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-b-gray-200">
-                <div className="flex items-start gap-4">
-                  <FiMenu className="text-gray-400 mt-1" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Quiz 1: Lesson 1
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      Quiz · 10 min
-                    </p>
-                  </div>
-                </div>
-                <FiMoreVertical className="text-gray-400 cursor-pointer" />
-              </div>
-
-              {/* ADD ACTIONS */}
-              <div className="grid grid-cols-2 text-sm">
-                <button
-                  onClick={() => setIsLessonModalOpen(true)}
-                  className="py-3 flex items-center justify-center gap-2 bg-white border-r border-r-gray-200 hover:bg-gray-300 transition"
-                >
-                  <FiPlus />
-                  Add Lesson
-                </button>
-
-                <button
-                  onClick={() => setIsQuizModalOpen(true)}
-                  className="py-3 flex items-center justify-center gap-2 bg-white hover:bg-gray-300 transition"
-                >
-                  <FiPlus />
-                  Add Quiz
-                </button>
-              </div>
+              ))}
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="flex flex-col sm:flex-row justify-end gap-4 mt-12">
+            <div className="flex justify-end gap-4 mt-12">
               <button className="border border-gray-300 px-6 py-2 rounded-lg text-sm">
                 Save as Draft
               </button>
@@ -126,36 +222,51 @@ export default function CreateCourseStep2() {
         </div>
       </div>
 
-      {/* ===== ADD LESSON MODAL ===== */}
+      {/* MODALS */}
       <Modal
         isOpen={isLessonModalOpen}
         onClose={() => setIsLessonModalOpen(false)}
         title="Lesson"
       >
-        <AddLessonForm onClose={() => setIsLessonModalOpen(false)} />
+        <AddLessonForm
+          onClose={() => setIsLessonModalOpen(false)}
+          onSave={addLessonToModule}
+        />
       </Modal>
 
-      {/* ===== ADD QUIZ MODAL ===== */}
       <Modal
         isOpen={isQuizModalOpen}
         onClose={() => setIsQuizModalOpen(false)}
         title="Quiz"
-        maxWidth="max-w-lg"
       >
-        <AddQuizForm onClose={() => setIsQuizModalOpen(false)} />
+        <AddQuizForm
+          onClose={() => setIsQuizModalOpen(false)}
+          onSave={addQuizToModule}
+        />
       </Modal>
 
       <Footer />
     </div>
   );
-}
+};
 
+export default CreateCourseStep2;
+
+// import { useState } from "react";
 // import TeacherNavbar from "../../../components/teacher/TeacherNavbar";
 // import Footer from "../../../components/studentcomponents/Footer";
 // import CreateCourseSteps from "../../../components/teacher/createCourseComponents/CreateCourseSteps";
+
+// import Modal from "../../../components/common/modal/Modal";
+// import AddLessonForm from "../../../components/teacher/createCourseComponents/AddLessonForm";
+// import AddQuizForm from "../../../components/teacher/createCourseComponents/AddQuizForm";
+
 // import { FiPlus, FiMoreVertical, FiMenu } from "react-icons/fi";
 
 // export default function CreateCourseStep2() {
+//   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+//   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+
 //   return (
 //     <div className="min-h-screen bg-white">
 //       <TeacherNavbar />
@@ -235,11 +346,18 @@ export default function CreateCourseStep2() {
 
 //               {/* ADD ACTIONS */}
 //               <div className="grid grid-cols-2 text-sm">
-//                 <button className="py-3 flex items-center justify-center gap-2 bg-white border-r border-r-gray-200 hover:bg-gray-300 transition">
+//                 <button
+//                   onClick={() => setIsLessonModalOpen(true)}
+//                   className="py-3 flex items-center justify-center gap-2 bg-white border-r border-r-gray-200 hover:bg-gray-300 transition"
+//                 >
 //                   <FiPlus />
 //                   Add Lesson
 //                 </button>
-//                 <button className="py-3 flex items-center justify-center gap-2 bg-white hover:bg-gray-300 transition">
+
+//                 <button
+//                   onClick={() => setIsQuizModalOpen(true)}
+//                   className="py-3 flex items-center justify-center gap-2 bg-white hover:bg-gray-300 transition"
+//                 >
 //                   <FiPlus />
 //                   Add Quiz
 //                 </button>
@@ -251,13 +369,35 @@ export default function CreateCourseStep2() {
 //               <button className="border border-gray-300 px-6 py-2 rounded-lg text-sm">
 //                 Save as Draft
 //               </button>
-//               <button className="bg-yellow-400 px-7 py-2 rounded-lg text-sm font-medium">
+//               <button
+//                 onClick={() => navigate("/teacher/create-course/step-3")}
+//                 className="bg-yellow-400 px-7 py-2 rounded-lg text-sm font-medium"
+//               >
 //                 Continue
 //               </button>
 //             </div>
 //           </div>
 //         </div>
 //       </div>
+
+//       {/* ===== ADD LESSON MODAL ===== */}
+//       <Modal
+//         isOpen={isLessonModalOpen}
+//         onClose={() => setIsLessonModalOpen(false)}
+//         title="Lesson"
+//       >
+//         <AddLessonForm onClose={() => setIsLessonModalOpen(false)} />
+//       </Modal>
+
+//       {/* ===== ADD QUIZ MODAL ===== */}
+//       <Modal
+//         isOpen={isQuizModalOpen}
+//         onClose={() => setIsQuizModalOpen(false)}
+//         title="Quiz"
+//         maxWidth="max-w-lg"
+//       >
+//         <AddQuizForm onClose={() => setIsQuizModalOpen(false)} />
+//       </Modal>
 
 //       <Footer />
 //     </div>
