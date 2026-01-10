@@ -49,7 +49,7 @@ const OnboardingStep4 = () => {
       dispatch(resetStudentOnboarding());
 
       // 4️⃣ Redirect
-      navigate("/dashboard");
+      navigate("/student-dashboard");
     } catch (error) {
       console.error("Student onboarding failed", error);
     }
