@@ -12,7 +12,7 @@ export const registerUser = async (formData) => {
     };
 
     const response = await axios.post(`${BASE_URL}/api/auth/register`, payload);
-
+// const response = await axios.post(`http://localhost:8080/api/auth/register`, payload);
     return response.data;
   } catch (error) {
     console.log("Error during register API", error);

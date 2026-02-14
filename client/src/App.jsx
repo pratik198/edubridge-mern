@@ -12,7 +12,8 @@ import TeachingPreferences from "./screens/auth/register/teacherOnBoarding/Teach
 import StudentDashboard from "./screens/dashboard/student/StudentHome";
 import TeacherDashboard from "./screens/teacher/dashboard/TeacherDashboard";
 import MyCourses from "./screens/teacher/myCourses/MyCourses";
-import CreateCourseStep1 from "./screens/teacher/createCourse/createCourseStep1";
+// import CreateCourseStep1 from "./screens/teacher/createCourse/createCourseStep1";
+import CreateCourseStep1 from "./screens/teacher/createCourse/CreateCourseStep1";
 import CreateCourseStep2 from "./screens/teacher/createCourse/CreateCourseStep2";
 import CreateCourseStep3 from "./screens/teacher/createCourse/CreateCourseStep3";
 const App = () => {

@@ -28,6 +28,9 @@ const Login = () => {
       const response = await loginUser(form);
 
       if (response?.success) {
+         localStorage.setItem("token", response.token);
+         
+         localStorage.setItem("user", JSON.stringify(response.user));
         if (response.user?.role === "educator") {
           navigate("/teacher-dashboard");
         } else if (response.user?.role === "student") {
