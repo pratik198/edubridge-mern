@@ -51,11 +51,12 @@ const registerUser = async (req, res) => {
 
     // ---- CREATE USER ----
     const user = await User.create({
-      fullName,
-      email,
-      password: hashedPassword,
-      role,
-    });
+  fullName,
+  email,
+  password: hashedPassword,
+  role: role || "student",
+      });
+
 
     // ---- SIGN TOKEN ----
     const token = jwt.sign(
@@ -137,11 +138,12 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
+  console.log("AUTH ERROR:", error);
+  res.status(500).json({
+    success: false,
+    message: error.message,
+  });
+}
 };
 
 // ================= LOGOUT =================

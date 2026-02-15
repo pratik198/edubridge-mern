@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const studentOnboardingRoutes = require("./routes/studentOnboardingRoutes");
 const teacherOnboardingRoutes = require("./routes/teacherOnboardingRoutes");
 const courseRoutes = require("./routes/courseRoutes");
+const userRoutes = require("./routes/userRoutes");
 const app = express();
 
 
@@ -18,6 +19,9 @@ app.use(express.json());
 
 
 // ===== Routes =====
+
+app.use("/api/users", userRoutes);
+
 app.use("/api/auth", authRoutes);
 app.use("/api/student-onboarding", studentOnboardingRoutes);
 app.use("/api/teacher-onboarding", teacherOnboardingRoutes);

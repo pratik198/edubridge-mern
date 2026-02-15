@@ -1,6 +1,6 @@
+
 const express = require("express");
 const router = express.Router();
-
 
 const {
   createCourse,
@@ -9,6 +9,10 @@ const {
   publishCourse,
   getTeacherCourses,
   updateCourse,
+  addQuiz,
+  deleteCourse,
+  getSingleCourse,
+  deleteQuiz,
 } = require("../controllers/courseController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -20,51 +24,31 @@ router.post("/", authMiddleware, createCourse);
 router.put("/:courseId/add-module", authMiddleware, addModule);
 
 // Add lesson
-router.put(
-  "/:courseId/:moduleId/add-lesson",
-  authMiddleware,
-  addLesson
-);
+router.put("/:courseId/:moduleId/add-lesson", authMiddleware, addLesson);
 
-// Publish
+// Publish course
 router.put("/:courseId/publish", authMiddleware, publishCourse);
 
 // Get teacher courses
 router.get("/my-courses", authMiddleware, getTeacherCourses);
 
-module.exports = router;
-//edit
+// Update course
+router.put("/:courseId", authMiddleware, updateCourse);
+
 router.put(
-  "/:courseId",
+  "/:courseId/:moduleId/add-quiz",
   authMiddleware,
-  updateCourse
+  addQuiz
 );
 
-// const authMiddleware = require("../middleware/authMiddleware");
+router.delete("/:courseId", authMiddleware, deleteCourse);
 
-// Create course
-router.post("/", authMiddleware, createCourse);
+router.get("/:courseId", authMiddleware, getSingleCourse);
 
-// Add module
-router.put("/:courseId/add-module", authMiddleware, addModule);
-
-// Add lesson
-router.put(
-  "/:courseId/:moduleId/add-lesson",
+router.delete(
+  "/:courseId/:moduleId/:quizId/delete-quiz",
   authMiddleware,
-  addLesson
+  deleteQuiz
 );
-
-// Publish
-router.put("/:courseId/publish", authMiddleware, publishCourse);
-
-// Get teacher courses
-router.get("/my-courses", authMiddleware, getTeacherCourses);
 
 module.exports = router;
-//edit
-router.put(
-  "/:courseId",
-  authMiddleware,
-  updateCourse
-);

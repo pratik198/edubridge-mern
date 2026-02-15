@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import TeacherNavbar from "../../components/teacher/TeacherNavbar";
+import TeacherNavbar from "../../components/teacher/TeacherNavbar";
 import Footer from "../../components/studentcomponents/Footer";
 import { FiTrash2, FiExternalLink } from "react-icons/fi";
 

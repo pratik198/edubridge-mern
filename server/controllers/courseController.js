@@ -2,6 +2,7 @@ const Course = require("../models/Course");
 // ============================
 // 1️⃣ Create Course (Step 1)
 // ============================
+
 exports.createCourse = async (req, res) => {
   try {
     const {
@@ -45,66 +46,54 @@ exports.addModule = async (req, res) => {
     const { courseId } = req.params;
     const { moduleTitle } = req.body;
 
-    const course = await Course.findById(courseId);
+    // 1️⃣ Find course and ensure teacher owns it
+    const course = await Course.findOne({
+      _id: courseId,
+      createdBy: req.user.id,
+    });
 
     if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Course not found or unauthorized",
+      });
     }
 
-    course.modules.push({ title: moduleTitle });
+    // 2️⃣ Generate default title if empty
+    const title =
+      moduleTitle && moduleTitle.trim() !== ""
+        ? moduleTitle
+        : `Module ${course.modules.length + 1}`;
 
-    await course.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Module added",
-      course,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-// ============================
-// 3️⃣ Add Lesson (YouTube)
-// ============================
-exports.addLesson = async (req, res) => {
-  try {
-    const { courseId, moduleId } = req.params;
-    const { title, description, duration, videoUrl } = req.body;
-
-    const course = await Course.findById(courseId);
-
-    const module = course.modules.id(moduleId);
-
-    if (!module) {
-      return res.status(404).json({ message: "Module not found" });
-    }
-
-    module.lessons.push({
+    // 3️⃣ Push new module
+    course.modules.push({
       title,
-      description,
-      duration,
-      videoUrl, // YouTube link
+      lessons: [],
+      quizzes: [],
     });
 
     await course.save();
 
     res.status(200).json({
       success: true,
-      message: "Lesson added",
-      course,
+      message: "Module added successfully",
+      modules: course.modules, // return only modules
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
 
-// ============================
-// 4️⃣ Publish Course
-// ============================
+
+
+
+
+// Publish Course
+
 exports.publishCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -168,6 +157,249 @@ exports.updateCourse = async (req, res) => {
       success: true,
       message: "Course updated successfully",
       course: updatedCourse,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// ============================
+// 4️⃣ Add Quiz
+// ============================
+// ============================
+// 4️⃣ Add Quiz (Production Safe)
+// ============================
+exports.addQuiz = async (req, res) => {
+  try {
+    const { courseId, moduleId } = req.params;
+    const { title, questions } = req.body;
+
+    // 1️⃣ Validate input
+    if (!title || !questions) {
+      return res.status(400).json({
+        success: false,
+        message: "Title and questions are required",
+      });
+    }
+
+    // 2️⃣ Find course (ensure teacher owns it)
+    const course = await Course.findOne({
+      _id: courseId,
+      createdBy: req.user.id,
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found or unauthorized",
+      });
+    }
+
+    // 3️⃣ Find module
+    const module = course.modules.id(moduleId);
+
+    if (!module) {
+      return res.status(404).json({
+        success: false,
+        message: "Module not found",
+      });
+    }
+
+    // 4️⃣ Ensure quizzes array exists (VERY IMPORTANT)
+    if (!module.quizzes) {
+      module.quizzes = [];
+    }
+
+    // 5️⃣ Push quiz
+    module.quizzes.push({
+      title,
+      questions,
+    });
+
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Quiz added successfully",
+      course,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// DELETE COURSE
+exports.deleteCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await Course.findOneAndDelete({
+      _id: courseId,
+      createdBy: req.user.id,
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Course deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getSingleCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await Course.findOne({
+      _id: courseId,
+      createdBy: req.user.id,
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      course,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.addLesson = async (req, res) => {
+  try {
+    const { courseId, moduleId } = req.params;
+    const { title, description, duration, videoUrl } = req.body;
+
+    const course = await Course.findOne({
+      _id: courseId,
+      createdBy: req.user.id,
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found or unauthorized",
+      });
+    }
+
+    const module = course.modules.id(moduleId);
+
+    if (!module) {
+      return res.status(404).json({
+        success: false,
+        message: "Module not found",
+      });
+    }
+
+    if (!module.lessons) {
+      module.lessons = [];
+    }
+
+    module.lessons.push({
+      title,
+      description,
+      duration,
+      videoUrl,
+    });
+
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Lesson added successfully",
+      course,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ============================
+// DELETE QUIZ
+// ============================
+exports.deleteQuiz = async (req, res) => {
+  try {
+    const { courseId, moduleId, quizId } = req.params;
+
+    const course = await Course.findOne({
+      _id: courseId,
+      createdBy: req.user.id,
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found or unauthorized",
+      });
+    }
+
+    const module = course.modules.id(moduleId);
+
+    if (!module) {
+      return res.status(404).json({
+        success: false,
+        message: "Module not found",
+      });
+    }
+
+    module.quizzes = module.quizzes.filter(
+      (quiz) => quiz._id.toString() !== quizId
+    );
+
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Quiz deleted successfully",
+      course,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// GET ALL STUDENTS (Teacher)
+// =============================
+exports.getAllStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" }).select(
+      "-password"
+    );
+
+    res.status(200).json({
+      success: true,
+      students,
     });
   } catch (error) {
     res.status(500).json({
