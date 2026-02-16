@@ -14,6 +14,8 @@ import MyCourses from "./screens/teacher/myCourses/MyCourses";
 import CreateCourseStep1 from "./screens/teacher/createCourse/CreateCourseStep1";
 import CreateCourseStep2 from "./screens/teacher/createCourse/CreateCourseStep2";
 import CreateCourseStep3 from "./screens/teacher/createCourse/CreateCourseStep3";
+import StudentProfile from "./screens/teacher/StudentProfile";
+
 const App = () => {
   return (
     <Routes>
@@ -46,6 +48,7 @@ const App = () => {
         element={<CreateCourseStep3 />}
       />
       <Route path="/teacher/students" element={<Students />} />
+      <Route path="/teacher/students/:id" element={<StudentProfile />} />
      
     </Routes>
   );

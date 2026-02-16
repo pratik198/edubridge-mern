@@ -1,228 +1,211 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-// import TeacherNavbar from "../../components/teacher/TeacherNavbar";
-import Footer from "../../components/studentcomponents/Footer";
-import { FiTrash2, FiExternalLink } from "react-icons/fi";
+import { useState, useRef, useEffect } from "react";
+import {
+  FiMenu,
+  FiX,
+  FiBell,
+  FiChevronDown,
+} from "react-icons/fi";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const Students = () => {
-  const token = localStorage.getItem("token");
+const TeacherNavbar = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const location = useLocation();
   const navigate = useNavigate();
+  const menuRef = useRef(null);
 
-  const [students, setStudents] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const isActive = (path) => location.pathname === path;
 
-  const studentsPerPage = 6;
-
-  /* ================= FETCH STUDENTS ================= */
-  const fetchStudents = async () => {
-    try {
-      const res = await fetch(
-        "http://localhost:5000/api/users/students",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        setStudents(data.students);
-      }
-    } catch (err) {
-      console.error("Error fetching students:", err);
-    }
-  };
-
-  /* ================= DELETE STUDENT ================= */
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this student?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/users/students/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        setStudents((prev) => prev.filter((s) => s._id !== id));
-      }
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  };
-
+  /* ================= CLOSE DROPDOWN ON OUTSIDE CLICK ================= */
   useEffect(() => {
-    fetchStudents();
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ================= PAGINATION ================= */
-  const indexOfLast = currentPage * studentsPerPage;
-  const indexOfFirst = indexOfLast - studentsPerPage;
-  const currentStudents = students.slice(indexOfFirst, indexOfLast);
-
-  const totalPages = Math.ceil(students.length / studentsPerPage);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
+  /* ================= LOGOUT ================= */
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentCourseId");
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <TeacherNavbar />
+    <>
+      {/* NAVBAR */}
+      <header className="w-full bg-white border-b border-gray-100 px-6 md:px-12 py-4 flex items-center justify-between">
 
-      <main className="flex-1 px-6 md:px-12 py-12">
-        {/* HEADER */}
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
+        {/* LOGO */}
+        <h1 className="text-2xl font-semibold tracking-tight text-yellow-500">
+          EduBridge
+        </h1>
+
+        {/* DESKTOP NAV */}
+        <div className="hidden md:flex items-center gap-10">
+          <nav className="flex gap-8 text-sm font-medium text-gray-500">
+
+            <Link
+              to="/teacher-dashboard"
+              className={`transition ${
+                isActive("/teacher-dashboard")
+                  ? "text-yellow-500"
+                  : "hover:text-yellow-500"
+              }`}
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              to="/t-my-courses"
+              className={`transition ${
+                isActive("/t-my-courses")
+                  ? "text-yellow-500"
+                  : "hover:text-yellow-500"
+              }`}
+            >
+              My Courses
+            </Link>
+
+            <Link
+              to="/teacher/students"
+              className={`transition ${
+                isActive("/teacher/students")
+                  ? "text-yellow-500"
+                  : "hover:text-yellow-500"
+              }`}
+            >
               Students
-            </h1>
-            <p className="text-sm text-gray-500 mt-2">
-              Manage and monitor your enrolled learners
-            </p>
-          </div>
+            </Link>
 
-          <div className="text-sm text-gray-500 font-medium">
-            {students.length} Total
+            <span className="hover:text-yellow-500 cursor-pointer transition">
+              Assessment
+            </span>
+          </nav>
+
+          <FiBell className="text-gray-500 hover:text-yellow-500 cursor-pointer transition" />
+
+          {/* PROFILE DROPDOWN */}
+          <div ref={menuRef} className="relative">
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <img
+                src="https://i.pravatar.cc/100"
+                alt="profile"
+                className="w-9 h-9 rounded-full border border-gray-200"
+              />
+              <FiChevronDown
+                className={`transition duration-200 ${
+                  dropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </div>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 shadow-xl rounded-xl z-50">
+                <ul className="text-sm py-2">
+
+                  <li
+                    className="px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      navigate("/teacher-dashboard");
+                    }}
+                  >
+                    My Profile
+                  </li>
+
+                  <li className="px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                    Settings
+                  </li>
+
+                  <hr className="my-1 border-gray-100" />
+
+                  <li
+                    className="px-4 py-2 text-red-500 hover:bg-red-50 cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </li>
+
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* TABLE CARD */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              {/* TABLE HEADER */}
-              <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="px-8 py-5 text-left font-medium">Student</th>
-                  <th className="px-8 py-5 text-left font-medium">Email</th>
-                  <th className="px-8 py-5 text-left font-medium">Role</th>
-                  <th className="px-8 py-5 text-left font-medium">Joined</th>
-                  <th className="px-8 py-5 text-left font-medium">Status</th>
-                  <th className="px-8 py-5 text-left font-medium">Actions</th>
-                </tr>
-              </thead>
+        {/* MOBILE MENU BUTTON */}
+        <FiMenu
+          className="text-2xl cursor-pointer md:hidden"
+          onClick={() => setMobileOpen(true)}
+        />
+      </header>
 
-              {/* TABLE BODY */}
-              <tbody className="divide-y divide-gray-100">
-                {currentStudents.length > 0 ? (
-                  currentStudents.map((student) => (
-                    <tr
-                      key={student._id}
-                      className="hover:bg-gray-50 transition-all duration-200"
-                    >
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                          <img
-                            src={`https://ui-avatars.com/api/?name=${student.fullName}&background=FACC15&color=000`}
-                            alt="avatar"
-                            className="w-10 h-10 rounded-full"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {student.fullName}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              ID: {student._id.slice(-6)}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+      {/* MOBILE OVERLAY */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-                      <td className="px-8 py-6 text-gray-700">
-                        {student.email}
-                      </td>
-
-                      <td className="px-8 py-6 capitalize text-gray-700">
-                        {student.role}
-                      </td>
-
-                      <td className="px-8 py-6 text-gray-500">
-                        {new Date(student.createdAt).toLocaleDateString()}
-                      </td>
-
-                      <td className="px-8 py-6">
-                        <span className="px-3 py-1 text-xs font-medium bg-green-50 text-green-600 rounded-full">
-                          Active
-                        </span>
-                      </td>
-
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-5">
-                          {/* ✅ PROFILE VIEW */}
-                          <FiExternalLink
-                            onClick={() =>
-                              navigate(`/teacher/students/${student._id}`)
-                            }
-                            className="text-gray-400 hover:text-yellow-500 cursor-pointer transition"
-                          />
-
-                          {/* ✅ DELETE */}
-                          <FiTrash2
-                            onClick={() => handleDelete(student._id)}
-                            className="text-gray-400 hover:text-red-500 cursor-pointer transition"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      className="text-center py-20 text-gray-400"
-                    >
-                      No students available
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+      {/* MOBILE SIDEBAR */}
+      <div
+        className={`fixed top-0 right-0 h-full w-[300px] bg-white shadow-xl z-50
+        transform transition-transform duration-300 ease-in-out
+        ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
+          <h1 className="text-xl font-semibold text-yellow-500">
+            EduBridge
+          </h1>
+          <FiX
+            className="text-2xl cursor-pointer"
+            onClick={() => setMobileOpen(false)}
+          />
         </div>
 
-        {/* PAGINATION */}
-        {totalPages > 1 && (
-          <div className="flex justify-end gap-4 mt-10">
-            <button
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-lg transition font-medium disabled:opacity-40"
-            >
-              ← Prev
-            </button>
+        <nav className="flex flex-col gap-6 px-6 py-8 text-gray-600 font-medium text-sm">
 
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className="px-6 py-2 bg-gray-100 hover:bg-yellow-400 hover:text-black text-sm rounded-lg transition font-medium disabled:opacity-40"
-            >
-              Next →
-            </button>
-          </div>
-        )}
-      </main>
+          <Link
+            to="/teacher-dashboard"
+            onClick={() => setMobileOpen(false)}
+            className={isActive("/teacher-dashboard") ? "text-yellow-500" : "hover:text-yellow-500"}
+          >
+            Dashboard
+          </Link>
 
-      <Footer />
-    </div>
+          <Link
+            to="/t-my-courses"
+            onClick={() => setMobileOpen(false)}
+            className={isActive("/t-my-courses") ? "text-yellow-500" : "hover:text-yellow-500"}
+          >
+            My Courses
+          </Link>
+
+          <Link
+            to="/teacher/students"
+            onClick={() => setMobileOpen(false)}
+            className={isActive("/teacher/students") ? "text-yellow-500" : "hover:text-yellow-500"}
+          >
+            Students
+          </Link>
+
+          <span className="hover:text-yellow-500 cursor-pointer">
+            Assessment
+          </span>
+
+        </nav>
+      </div>
+    </>
   );
 };
 
-export default Students;
+export default TeacherNavbar;

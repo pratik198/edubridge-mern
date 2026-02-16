@@ -73,9 +73,9 @@ const StudentProfile = () => {
             </div>
           </div>
 
-          <button className="bg-yellow-400 hover:bg-yellow-500 transition px-5 py-2 rounded-lg text-sm font-medium">
+          {/* <button className="bg-yellow-400 hover:bg-yellow-500 transition px-5 py-2 rounded-lg text-sm font-medium">
             Edit Profile
-          </button>
+          </button> */}
         </div>
 
         {/* STATS */}
