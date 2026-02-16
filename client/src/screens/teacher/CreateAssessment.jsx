@@ -5,6 +5,7 @@ import Footer from "../../components/studentcomponents/Footer";
 
 const CreateAssessment = () => {
   const navigate = useNavigate();
+  
 
   const [assessment, setAssessment] = useState({
     course: "",
