@@ -1,0 +1,38 @@
+export const sampleRecommendedCourses = [
+  {
+    id: 1,
+    instructor: "Amina Yusuf",
+    title: "UI/UX Design Fund",
+    rating: "4.8",
+    duration: "5h 30m",
+    level: "Beginner",
+    image: "https://images.unsplash.com/photo-1587614382346-4ec70e388b28",
+  },
+  {
+    id: 2,
+    instructor: "Sarah Thompson",
+    title: "Build AI Chatbots Python",
+    rating: "4.6",
+    duration: "8h 10m",
+    level: "Intermediate",
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+  },
+  {
+    id: 3,
+    instructor: "Dr. Leila Habte",
+    title: "Responsive Web Design",
+    rating: "4.7",
+    duration: "3h 45m",
+    level: "Beginner",
+    image: "https://images.unsplash.com/photo-1551434678-e076c223a692",
+  },
+  {
+    id: 4,
+    instructor: "Daniel Asseda",
+    title: "Data Science Course",
+    rating: "4.9",
+    duration: "10h 20m",
+    level: "Intermediate",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+  },
+];

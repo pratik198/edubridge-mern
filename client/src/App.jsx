@@ -16,6 +16,13 @@ import MyCourses from "./screens/teacher/myCourses/MyCourses";
 import CreateCourseStep1 from "./screens/teacher/createCourse/CreateCourseStep1";
 import CreateCourseStep2 from "./screens/teacher/createCourse/CreateCourseStep2";
 import CreateCourseStep3 from "./screens/teacher/createCourse/CreateCourseStep3";
+import StudentDash from "./screens/dashboard/student/StudentDash";
+import EnrolledCourses from "./screens/dashboard/enrolledCourses/EnrolledCourses";
+import CourseDetails from "./screens/dashboard/courseDetails/CourseDetails";
+import LessonPlayer from "./screens/dashboard/lessonPlayer/LessonPlayer";
+import QuizPage from "./screens/dashboard/quizPage/QuizPage";
+import QuizAttempt from "./screens/dashboard/quizAttempt/QuizAttempt";
+import StudentInfo from "./screens/dashboard/studentInfo/StudentInfo";
 const App = () => {
   return (
     <Routes>
@@ -30,7 +37,26 @@ const App = () => {
       <Route path="/teaching-preferences" element={<TeachingPreferences />} />
 
       {/* STUDENT ROUTES */}
-      <Route path="/student-dashboard" element={<StudentDashboard />} />
+      <Route path="/student-home" element={<StudentDashboard />} />
+      <Route path="/student-dashboard" element={<StudentDash />} />
+      <Route path="/s-enrolled-courses" element={<EnrolledCourses />} />
+      <Route
+        path="/student-course/:courseId/:moduleId/:lessonId"
+        element={<CourseDetails />}
+      />
+      <Route
+        path="/student-course/:courseId/:moduleId/:lessonId/learn"
+        element={<LessonPlayer />}
+      />
+      <Route
+        path="/student-course/:courseId/:moduleId/:lessonId/quiz"
+        element={<QuizPage />}
+      />
+      <Route
+        path="/student-course/:courseId/:moduleId/:lessonId/quiz/attempt"
+        element={<QuizAttempt />}
+      />
+      <Route path="/student-profile" element={<StudentInfo />} />
 
       {/* TEACHER ROUTES */}
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />

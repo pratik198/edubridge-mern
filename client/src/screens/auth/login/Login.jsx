@@ -28,20 +28,20 @@ const Login = () => {
       const response = await loginUser(form);
 
       if (response?.success) {
-         localStorage.setItem("token", response.token);
-         
-         localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("token", response.token);
+
+        localStorage.setItem("user", JSON.stringify(response.user));
         if (response.user?.role === "educator") {
           navigate("/teacher-dashboard");
         } else if (response.user?.role === "student") {
-          navigate("/student-dashboard");
+          navigate("/student-home");
         }
       }
     } catch (err) {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Invalid email or password"
+          "Invalid email or password",
       );
     } finally {
       setLoading(false);
