@@ -10,13 +10,12 @@ body {
   font-family: "Inter", system-ui, sans-serif;
   background: #ffffff;
   color: #0f172a;
-   font-family: "Poppins", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
-
 
 @layer utilities {
   .animate-fade-in {
-    animation: fade .6s ease forwards;
+    animation: fade 0.6s ease forwards;
   }
 
   @keyframes fade {
@@ -31,16 +30,13 @@ body {
   }
 }
 
-
-
 @layer utilities {
-
   .animate-hero-text {
-    animation: fadeUp .7s ease forwards;
+    animation: fadeUp 0.7s ease forwards;
   }
 
   .animate-hero-fade {
-    animation: fade .7s ease forwards;
+    animation: fade 0.7s ease forwards;
   }
 
   .animate-float {
@@ -61,7 +57,7 @@ body {
   @keyframes fade {
     from {
       opacity: 0;
-      transform: scale(.98);
+      transform: scale(0.98);
     }
     to {
       opacity: 1;
@@ -70,27 +66,48 @@ body {
   }
 
   @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
   }
 }
 @layer utilities {
   @keyframes slideIn {
-    from { transform: translateX(-40px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+      transform: translateX(-40px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 }
 @keyframes slideIn {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(.98); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-
 
 @keyframes fadeUp {
   from {
@@ -101,4 +118,42 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ============================= */
+/* PREMIUM AUTO-HIDE SCROLLBAR */
+/* ============================= */
+
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+}
+
+/* Chrome / Edge / Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Hide track */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Hidden by default */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  transition:
+    background-color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+/* Show only on hover */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #ffffff; /* Tailwind yellow-400 */
+}
+
+/* Firefox hover fix */
+.custom-scrollbar:hover {
+  scrollbar-color: #ffffff transparent;
 }

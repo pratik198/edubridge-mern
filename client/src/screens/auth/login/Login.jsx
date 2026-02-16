@@ -46,7 +46,7 @@ const Login = () => {
         if (data.user?.role === "educator") {
           navigate("/teacher-dashboard");
         } else {
-          navigate("/student-dashboard");
+          navigate("/student-home");
         }
       }
     } catch (err) {
