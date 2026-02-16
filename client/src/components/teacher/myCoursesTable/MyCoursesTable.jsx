@@ -1,3 +1,5 @@
+
+
 import {
   useReactTable,
   getCoreRowModel,
@@ -8,56 +10,64 @@ import StatusBadge from "../statusBadge/StatusBadge";
 
 const MyCoursesTable = ({ data }) => {
   const columns = [
-    // {
-    //   id: "select",
-    //   header: "",
-    //   cell: () => (
-    //     <input
-    //       type="checkbox"
-    //       className="w-4 h-4 rounded border-gray-300 text-yellow-400 focus:ring-yellow-400"
-    //     />
-    //   ),
-    // },
     {
       accessorKey: "title",
       header: "Course Title",
       cell: ({ getValue }) => (
-        <span className="text-gray-800 font-medium">{getValue()}</span>
+        <span className="text-gray-800 font-medium">
+          {getValue()}
+        </span>
       ),
     },
     {
       id: "status",
       header: "Status",
-      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      cell: ({ row }) => (
+        <StatusBadge status={row.original.status} />
+      ),
     },
     {
       id: "enrollments",
       header: "Enrollments",
       cell: ({ row }) => (
-        <span className="text-gray-800">{row.original.enrollments ?? "-"}</span>
+        <span className="text-gray-800">
+          {row.original.enrollments ?? "-"}
+        </span>
       ),
     },
     {
       id: "completion",
       header: "Completion Rate",
       cell: ({ row }) => (
-        <span className="text-gray-800">{row.original.completion ?? "-"}</span>
+        <span className="text-gray-800">
+          {row.original.completion ?? "-"}
+        </span>
       ),
     },
     {
       id: "updated",
       header: "Last Updated",
       cell: ({ row }) => (
-        <span className="text-gray-800">{row.original.updated ?? "-"}</span>
+        <span className="text-gray-800">
+          {row.original.updated ?? "-"}
+        </span>
       ),
     },
     {
       id: "actions",
       header: "Actions",
-      cell: () => (
+      cell: ({ row }) => (
         <div className="flex items-center gap-4 text-sm">
-          <FaEdit className="text-blue-600 cursor-pointer hover:opacity-80" />
-          <FaTrash className="text-red-500 cursor-pointer hover:opacity-80" />
+          <FaEdit
+            className="text-blue-600 cursor-pointer hover:opacity-80"
+            onClick={() => row.original.onEdit?.()}
+          />
+
+          <FaTrash
+            className="text-red-500 cursor-pointer hover:opacity-80"
+            onClick={() => row.original.onDelete?.()}
+          />
+
           <FaExternalLinkAlt className="text-gray-700 cursor-pointer hover:opacity-80" />
         </div>
       ),
@@ -98,8 +108,14 @@ const MyCoursesTable = ({ data }) => {
               className="border-b border-gray-100 last:border-none hover:bg-[#fafafa] transition-colors"
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-5 py-4 text-sm text-gray-700">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                <td
+                  key={cell.id}
+                  className="px-5 py-4 text-sm text-gray-700"
+                >
+                  {flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                  )}
                 </td>
               ))}
             </tr>

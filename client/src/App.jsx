@@ -1,8 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-
 import Login from "./screens/auth/login/Login";
 import Register from "./screens/auth/register/Register";
-
+import Students from "./screens/teacher/Students";
 import Onboarding from "./screens/auth/register/studentOnboarding/OnBording";
 import OnboardingStep2 from "./screens/auth/register/studentOnboarding/OnboardingStep2";
 import OnboardingStep3 from "./screens/auth/register/studentOnboarding/OnboardingStep3";
@@ -12,7 +11,6 @@ import TeachingPreferences from "./screens/auth/register/teacherOnBoarding/Teach
 import StudentDashboard from "./screens/dashboard/student/StudentHome";
 import TeacherDashboard from "./screens/teacher/dashboard/TeacherDashboard";
 import MyCourses from "./screens/teacher/myCourses/MyCourses";
-// import CreateCourseStep1 from "./screens/teacher/createCourse/createCourseStep1";
 import CreateCourseStep1 from "./screens/teacher/createCourse/CreateCourseStep1";
 import CreateCourseStep2 from "./screens/teacher/createCourse/CreateCourseStep2";
 import CreateCourseStep3 from "./screens/teacher/createCourse/CreateCourseStep3";
@@ -23,6 +21,8 @@ import LessonPlayer from "./screens/dashboard/lessonPlayer/LessonPlayer";
 import QuizPage from "./screens/dashboard/quizPage/QuizPage";
 import QuizAttempt from "./screens/dashboard/quizAttempt/QuizAttempt";
 import StudentInfo from "./screens/dashboard/studentInfo/StudentInfo";
+import StudentProfile from "./screens/teacher/StudentProfile";
+
 const App = () => {
   return (
     <Routes>
@@ -73,25 +73,10 @@ const App = () => {
         path="/teacher/create-course/step-3"
         element={<CreateCourseStep3 />}
       />
+      <Route path="/teacher/students" element={<Students />} />
+      <Route path="/teacher/students/:id" element={<StudentProfile />} />
     </Routes>
   );
 };
 
 export default App;
-
-// import React from "react";
-// import MyCourses from "./screens/teacher/myCourses/MyCourses";
-// // import TeacherDashboard from "./screens/teacher/dashboard/TeacherDashboard";
-// // import StudentDashboard from "./screens/dashboard/student/StudentHome";
-
-// const App = () => {
-//   return (
-//     <div>
-//       {/* <StudentDashboard /> */}
-//       {/* <TeacherDashboard /> */}
-//       <MyCourses />
-//     </div>
-//   );
-// };
-
-// export default App;
