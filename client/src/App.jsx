@@ -22,7 +22,8 @@ import QuizPage from "./screens/dashboard/quizPage/QuizPage";
 import QuizAttempt from "./screens/dashboard/quizAttempt/QuizAttempt";
 import StudentInfo from "./screens/dashboard/studentInfo/StudentInfo";
 import StudentProfile from "./screens/teacher/StudentProfile";
-
+import CourseDetailsForTeacher from "./screens/teacher/CourseDetailsForTeacher";
+import TeacherProfile from "./screens/teacher/TeacherProfile";
 const App = () => {
   return (
     <Routes>
@@ -75,6 +76,12 @@ const App = () => {
       />
       <Route path="/teacher/students" element={<Students />} />
       <Route path="/teacher/students/:id" element={<StudentProfile />} />
+      <Route path="/teacher/course/:courseId" element={<CourseDetails />} />
+      <Route
+        path="/teacher/course-details/:courseId"
+        element={<CourseDetailsForTeacher />}
+      />
+      <Route path="/teacher-profile" element={<TeacherProfile />} />
     </Routes>
   );
 };

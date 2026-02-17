@@ -1,29 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-
-const courses = [
-  { title: "UI Design Basics", enrollments: 340 },
-  { title: "Data Science Course", enrollments: 275 },
-  { title: "Digital Illustration", enrollments: 50 },
-  { title: "Advanced Excel", enrollments: 410 },
-  { title: "React Fundamentals", enrollments: 380 },
-  { title: "Node.js Essentials", enrollments: 290 },
-  { title: "UI Animation Mastery", enrollments: 180 },
-];
 
 const INITIAL_COUNT = 4;
 
 export default function LatestCourses() {
-  const [expanded, setExpanded] = useState(false);
+  const token = localStorage.getItem("token");
 
-  const visibleCourses = expanded ? courses : courses.slice(0, INITIAL_COUNT);
+  const [expanded, setExpanded] = useState(false);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/courses/my-courses",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Sort by updated date (latest first)
+          const sorted = data.courses
+            .sort(
+              (a, b) =>
+                new Date(b.updatedAt) - new Date(a.updatedAt)
+            )
+            .map((course) => ({
+              title: course.title,
+              enrollments: course.enrollments || 0,
+            }));
+
+          setCourses(sorted);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCourses();
+  }, [token]);
+
+  const visibleCourses = expanded
+    ? courses
+    : courses.slice(0, INITIAL_COUNT);
 
   return (
     <div className="space-y-6">
-      {/* TITLE */}
       <h2 className="text-xl font-semibold">Latest Courses</h2>
 
-      {/* GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {visibleCourses.map((course, index) => (
           <div
@@ -39,7 +70,9 @@ export default function LatestCourses() {
             "
           >
             <div>
-              <p className="font-medium text-gray-900">{course.title}</p>
+              <p className="font-medium text-gray-900">
+                {course.title}
+              </p>
               <p className="text-sm text-gray-500 mt-1">
                 Enrollments: {course.enrollments}
               </p>
@@ -50,7 +83,6 @@ export default function LatestCourses() {
         ))}
       </div>
 
-      {/* BUTTON */}
       {courses.length > INITIAL_COUNT && (
         <button
           onClick={() => setExpanded(!expanded)}

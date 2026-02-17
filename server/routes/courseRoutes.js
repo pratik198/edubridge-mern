@@ -43,7 +43,7 @@ router.put(
 
 router.delete("/:courseId", authMiddleware, deleteCourse);
 
-router.get("/:courseId", authMiddleware, getSingleCourse);
+router.get("/:courseId", authMiddleware, getSingleCourse);   // single course details
 
 router.delete(
   "/:courseId/:moduleId/:quizId/delete-quiz",

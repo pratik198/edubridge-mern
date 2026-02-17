@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import {
   FiMenu,
@@ -15,7 +16,9 @@ const TeacherNavbar = () => {
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
-  const isActive = (path) => location.pathname === path;
+  /* ================= ACTIVE ROUTE ================= */
+  const isActive = (path) =>
+    location.pathname.startsWith(path);
 
   /* ================= CLOSE DROPDOWN ON OUTSIDE CLICK ================= */
   useEffect(() => {
@@ -42,7 +45,10 @@ const TeacherNavbar = () => {
       <header className="w-full bg-white border-b border-gray-100 px-6 md:px-12 py-4 flex items-center justify-between">
 
         {/* LOGO */}
-        <h1 className="text-2xl font-semibold tracking-tight text-yellow-500">
+        <h1
+          className="text-2xl font-semibold tracking-tight text-yellow-500 cursor-pointer"
+          onClick={() => navigate("/teacher-dashboard")}
+        >
           EduBridge
         </h1>
 
@@ -83,9 +89,17 @@ const TeacherNavbar = () => {
               Students
             </Link>
 
-            <span className="hover:text-yellow-500 cursor-pointer transition">
+            {/* ✅ Assessment now properly routed */}
+            <Link
+              to="/teacher/assessment"
+              className={`transition ${
+                isActive("/teacher/assessment")
+                  ? "text-yellow-500"
+                  : "hover:text-yellow-500"
+              }`}
+            >
               Assessment
-            </span>
+            </Link>
           </nav>
 
           <FiBell className="text-gray-500 hover:text-yellow-500 cursor-pointer transition" />
@@ -112,11 +126,12 @@ const TeacherNavbar = () => {
               <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 shadow-xl rounded-xl z-50">
                 <ul className="text-sm py-2">
 
+                  {/* ✅ My Profile fixed */}
                   <li
                     className="px-4 py-2 hover:bg-gray-50 cursor-pointer"
                     onClick={() => {
                       setDropdownOpen(false);
-                      navigate("/teacher-dashboard");
+                      navigate("/teacher-profile");
                     }}
                   >
                     My Profile
@@ -163,7 +178,13 @@ const TeacherNavbar = () => {
         ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
-          <h1 className="text-xl font-semibold text-yellow-500">
+          <h1
+            className="text-xl font-semibold text-yellow-500 cursor-pointer"
+            onClick={() => {
+              navigate("/teacher-dashboard");
+              setMobileOpen(false);
+            }}
+          >
             EduBridge
           </h1>
           <FiX
@@ -198,9 +219,14 @@ const TeacherNavbar = () => {
             Students
           </Link>
 
-          <span className="hover:text-yellow-500 cursor-pointer">
+          {/* ✅ Assessment mobile route fixed */}
+          <Link
+            to="/teacher/assessment"
+            onClick={() => setMobileOpen(false)}
+            className={isActive("/teacher/assessment") ? "text-yellow-500" : "hover:text-yellow-500"}
+          >
             Assessment
-          </span>
+          </Link>
 
         </nav>
       </div>

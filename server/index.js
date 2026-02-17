@@ -11,6 +11,8 @@ const teacherOnboardingRoutes = require("./routes/teacherOnboardingRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const userRoutes = require("./routes/userRoutes");
 const assessmentRoutes = require("./routes/assessmentRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const app = express();
 
 
@@ -29,6 +31,9 @@ app.use("/api/teacher-onboarding", teacherOnboardingRoutes);
 app.use("/api/courses", courseRoutes);
 
 app.use("/api/assessment", assessmentRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/profile", profileRoutes);
 
 // ===== Health Check Route =====
 app.get("/", (req, res) => {
