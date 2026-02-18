@@ -60,8 +60,7 @@ import assets from "../../assets/assets";
 
 export default function Hero() {
   return (
-    <section className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
-
+    <section className="max-w-7xl mx-auto px-6 md:px-10 py-8 grid md:grid-cols-2 gap-10 items-center">
       {/* LEFT */}
       <div className="animate-hero-text text-center md:text-left">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.2]">
@@ -70,9 +69,8 @@ export default function Hero() {
         </h1>
 
         <p className="text-gray-600 mt-5 text-base sm:text-lg max-w-xl mx-auto md:mx-0">
-          Ready to continue your journey in UI/UX and AI?
-          Let’s keep learning and building your future —
-          one course at a time.
+          Ready to continue your journey in UI/UX and AI? Let’s keep learning
+          and building your future — one course at a time.
         </p>
 
         <button
@@ -97,9 +95,9 @@ export default function Hero() {
 
       {/* RIGHT */}
       <div className="flex justify-center animate-hero-fade">
-
         {/* Yellow Circle */}
-        <div className="
+        <div
+          className="
           bg-yellow-400 
           rounded-full 
           flex 
@@ -109,7 +107,8 @@ export default function Hero() {
           sm:w-80 sm:h-80
           md:w-[480px] md:h-[480px]
           lg:w-[560px] lg:h-[560px]
-        ">
+        "
+        >
           <img
             src={assets.herosectionrightimg}
             alt="Learning Illustration"
@@ -122,7 +121,6 @@ export default function Hero() {
           />
         </div>
       </div>
-
     </section>
   );
 }

@@ -1,3 +1,200 @@
+// import { useParams, Link } from "react-router-dom";
+// import { useRef, useState, useEffect } from "react";
+// import Navbar from "../../../components/studentcomponents/Navbar";
+// import Footer from "../../../components/studentcomponents/Footer";
+// import { courses } from "../../../data/courses";
+// import {
+//   Play,
+//   Pause,
+//   Volume2,
+//   VolumeX,
+//   Download,
+//   FileText,
+//   Settings,
+//   Maximize,
+//   Minimize,
+// } from "lucide-react";
+
+// const LessonPlayer = () => {
+//   const { courseId, moduleId, lessonId } = useParams();
+
+//   const course = courses.find((c) => c._id === courseId);
+//   const moduleIndex = course?.modules.findIndex((m) => m._id === moduleId);
+//   const module = course?.modules[moduleIndex];
+
+//   const lessonIndex = module?.lessons.findIndex((l) => l._id === lessonId);
+//   const lesson = module?.lessons[lessonIndex];
+
+//   const videoRef = useRef(null);
+//   const containerRef = useRef(null);
+
+//   const [playing, setPlaying] = useState(false);
+//   const [progress, setProgress] = useState(0);
+//   const [currentTime, setCurrentTime] = useState(0);
+//   const [duration, setDuration] = useState(0);
+//   const [volume, setVolume] = useState(1);
+//   const [isMuted, setIsMuted] = useState(false);
+//   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+//   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+//   const [isFullscreen, setIsFullscreen] = useState(false);
+
+//   if (!course || !module || !lesson)
+//     return <div className="pt-24 px-10">Not found</div>;
+
+//   /* ================= NEXT LESSON LOGIC ================= */
+
+//   let nextLesson = null;
+//   let prevLesson = null;
+
+//   // NEXT
+//   if (lessonIndex < module.lessons.length - 1) {
+//     nextLesson = module.lessons[lessonIndex + 1];
+//   } else if (moduleIndex < course.modules.length - 1) {
+//     const nextModule = course.modules[moduleIndex + 1];
+//     nextLesson = nextModule.lessons[0];
+//   }
+
+//   // PREVIOUS
+//   if (lessonIndex > 0) {
+//     prevLesson = module.lessons[lessonIndex - 1];
+//   } else if (moduleIndex > 0) {
+//     const prevModule = course.modules[moduleIndex - 1];
+//     prevLesson = prevModule.lessons[prevModule.lessons.length - 1];
+//   }
+
+//   /* ================= VIDEO CONTROLS ================= */
+
+//   const togglePlay = () => {
+//     if (!videoRef.current) return;
+//     playing ? videoRef.current.pause() : videoRef.current.play();
+//     setPlaying(!playing);
+//   };
+
+//   const handleTimeUpdate = () => {
+//     if (!videoRef.current) return;
+//     const current = videoRef.current.currentTime;
+//     const dur = videoRef.current.duration;
+//     setCurrentTime(current);
+//     setDuration(dur);
+//     setProgress((current / dur) * 100);
+//   };
+
+//   const formatTime = (seconds) => {
+//     if (!seconds || isNaN(seconds)) return "0:00";
+//     const mins = Math.floor(seconds / 60);
+//     const secs = Math.floor(seconds % 60);
+//     return `${mins}:${secs.toString().padStart(2, "0")}`;
+//   };
+
+//   useEffect(() => {
+//     if (videoRef.current) {
+//       videoRef.current.load();
+//       setPlaying(false);
+//       setCurrentTime(0);
+//       setProgress(0);
+//     }
+//   }, [lessonId]);
+
+//   return (
+//     <>
+//       <div className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
+//         <Navbar />
+//       </div>
+
+//       <div className="bg-white min-h-screen pt-24 flex flex-col">
+//         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
+//           {/* ================= SIDEBAR ================= */}
+//           <div className="hidden md:block w-72">
+//             <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto">
+//               <h2 className="text-lg font-semibold text-gray-900 mb-6">
+//                 {course.title}
+//               </h2>
+
+//               {module.lessons.map((l) => (
+//                 <Link
+//                   key={l._id}
+//                   to={
+//                     l.type === "quiz"
+//                       ? `/student-course/${course._id}/${module._id}/${l._id}/quiz`
+//                       : `/student-course/${course._id}/${module._id}/${l._id}/learn`
+//                   }
+//                   className={`block rounded-lg p-4 border mb-2 ${
+//                     l._id === lesson._id
+//                       ? "bg-gray-200"
+//                       : "bg-gray-50 hover:bg-gray-100"
+//                   }`}
+//                 >
+//                   {l.title}
+//                 </Link>
+//               ))}
+//             </div>
+//           </div>
+
+//           {/* ================= RIGHT SIDE ================= */}
+//           <div className="flex-1">
+//             <div className="mb-8 border-b border-gray-200 pb-4 flex justify-between items-center">
+//               <h1 className="text-2xl font-semibold">{lesson.title}</h1>
+
+//               <div className="flex gap-6">
+//                 {/* PREVIOUS BUTTON */}
+//                 {prevLesson && (
+//                   <Link
+//                     to={
+//                       prevLesson.type === "quiz"
+//                         ? `/student-course/${course._id}/${module._id}/${prevLesson._id}/quiz`
+//                         : `/student-course/${course._id}/${module._id}/${prevLesson._id}/learn`
+//                     }
+//                     className="text-gray-600 hover:text-black font-medium"
+//                   >
+//                     ← Previous
+//                   </Link>
+//                 )}
+
+//                 {/* NEXT BUTTON */}
+//                 {nextLesson && (
+//                   <Link
+//                     to={
+//                       nextLesson.type === "quiz"
+//                         ? `/student-course/${course._id}/${module._id}/${nextLesson._id}/quiz`
+//                         : `/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`
+//                     }
+//                     className="text-yellow-500 font-medium"
+//                   >
+//                     Next →
+//                   </Link>
+//                 )}
+//               </div>
+//             </div>
+
+//             {/* VIDEO */}
+//             {lesson.type === "video" && (
+//               <div className="max-w-4xl">
+//                 <video
+//                   ref={videoRef}
+//                   onTimeUpdate={handleTimeUpdate}
+//                   onLoadedMetadata={handleTimeUpdate}
+//                   className="w-full rounded-xl"
+//                   controls
+//                 >
+//                   <source src={lesson.videoUrl} type="video/mp4" />
+//                 </video>
+
+//                 <div className="mt-4 text-sm text-gray-500">
+//                   {formatTime(currentTime)} / {formatTime(duration)}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+
+//         <Footer />
+//       </div>
+//     </>
+//   );
+// };
+
+// export default LessonPlayer;
+
 import { useParams, Link } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
@@ -240,7 +437,18 @@ const LessonPlayer = () => {
     (l) => l._id === lesson._id,
   );
 
-  const nextLesson = module.lessons[currentLessonIndex + 1];
+  let nextLesson = null;
+  let prevLesson = null;
+
+  // NEXT lesson (same module only — keeping your original logic style)
+  if (currentLessonIndex < module.lessons.length - 1) {
+    nextLesson = module.lessons[currentLessonIndex + 1];
+  }
+
+  // PREVIOUS lesson
+  if (currentLessonIndex > 0) {
+    prevLesson = module.lessons[currentLessonIndex - 1];
+  }
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
@@ -340,14 +548,36 @@ const LessonPlayer = () => {
             <div className="mb-8 border-b border-gray-200 pb-4">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-                {nextLesson && (
-                  <Link
-                    to={`/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`}
-                    className="text-yellow-500 font-medium"
-                  >
-                    Next →
-                  </Link>
-                )}
+
+                <div className="flex gap-6">
+                  {/* PREVIOUS BUTTON */}
+                  {prevLesson && (
+                    <Link
+                      to={
+                        prevLesson.type === "quiz"
+                          ? `/student-course/${course._id}/${module._id}/${prevLesson._id}/quiz`
+                          : `/student-course/${course._id}/${module._id}/${prevLesson._id}/learn`
+                      }
+                      className="text-gray-600 font-medium hover:text-black"
+                    >
+                      ← Previous
+                    </Link>
+                  )}
+
+                  {/* NEXT BUTTON */}
+                  {nextLesson && (
+                    <Link
+                      to={
+                        nextLesson.type === "quiz"
+                          ? `/student-course/${course._id}/${module._id}/${nextLesson._id}/quiz`
+                          : `/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`
+                      }
+                      className="text-yellow-500 font-medium"
+                    >
+                      Next →
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -519,203 +749,3 @@ const LessonPlayer = () => {
 };
 
 export default LessonPlayer;
-
-// import { useParams, Link } from "react-router-dom";
-// import { useRef, useState } from "react";
-// import Navbar from "../../../components/studentcomponents/Navbar";
-// import Footer from "../../../components/studentcomponents/Footer";
-// import { courses } from "../../../data/courses";
-// import {
-//   Play,
-//   Pause,
-//   Volume2,
-//   Download,
-//   FileText,
-//   Settings,
-//   Maximize,
-// } from "lucide-react";
-
-// const LessonPlayer = () => {
-//   const { courseId, moduleId, lessonId } = useParams();
-
-//   const course = courses.find((c) => c.id === Number(courseId));
-//   const module = course?.modules.find((m) => m.id === Number(moduleId));
-//   const lesson = module?.lessons.find((l) => l.id === Number(lessonId));
-
-//   const videoRef = useRef(null);
-//   const [playing, setPlaying] = useState(false);
-//   const [progress, setProgress] = useState(0);
-//   const [currentTime, setCurrentTime] = useState(0);
-//   const [duration, setDuration] = useState(0);
-
-//   if (!course || !module || !lesson)
-//     return <div className="pt-24 px-10">Not found</div>;
-
-//   const togglePlay = () => {
-//     if (!videoRef.current) return;
-//     playing ? videoRef.current.pause() : videoRef.current.play();
-//     setPlaying(!playing);
-//   };
-
-//   const handleTimeUpdate = () => {
-//     if (!videoRef.current) return;
-//     const current = videoRef.current.currentTime;
-//     const dur = videoRef.current.duration;
-//     setCurrentTime(current);
-//     setDuration(dur);
-//     setProgress((current / dur) * 100);
-//   };
-
-//   const handleProgressClick = (e) => {
-//     if (!videoRef.current) return;
-//     const rect = e.currentTarget.getBoundingClientRect();
-//     const x = e.clientX - rect.left;
-//     const percentage = x / rect.width;
-//     videoRef.current.currentTime = percentage * videoRef.current.duration;
-//   };
-
-//   const formatTime = (seconds) => {
-//     if (!seconds || isNaN(seconds)) return "0:00";
-//     const mins = Math.floor(seconds / 60);
-//     const secs = Math.floor(seconds % 60);
-//     return `${mins}:${secs.toString().padStart(2, "0")}`;
-//   };
-
-//   const currentLessonIndex = module.lessons.findIndex(
-//     (l) => l.id === lesson.id,
-//   );
-//   const nextLesson = module.lessons[currentLessonIndex + 1];
-
-//   return (
-//     <>
-//       <div className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
-//         <Navbar />
-//       </div>
-
-//       <div className="bg-white min-h-screen pt-24 flex flex-col">
-//         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
-//           {/* SIDEBAR */}
-//           <div className="hidden md:block w-72">
-//             <div className="bg-white border border-gray-200 rounded-xl p-6 max-h-[70vh] overflow-y-auto">
-//               <h2 className="text-lg font-semibold mb-6">{course.title}</h2>
-
-//               <div className="space-y-2">
-//                 {module.lessons.map((l) => (
-//                   <Link
-//                     key={l.id}
-//                     to={`/student-course/${course.id}/${module.id}/${l.id}/learn`}
-//                     className={`block px-4 py-3 rounded-lg text-sm transition ${
-//                       l.id === lesson.id
-//                         ? "bg-gray-200 font-medium"
-//                         : "bg-gray-100 hover:bg-gray-200"
-//                     }`}
-//                   >
-//                     {l.title}
-//                     <div className="text-xs text-gray-500 mt-1">
-//                       {l.duration} min
-//                     </div>
-//                   </Link>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* RIGHT SIDE */}
-//           <div className="flex-1">
-//             <div className="mb-8 border-b pb-4">
-//               <div className="flex items-center justify-between">
-//                 <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-//                 {nextLesson && (
-//                   <Link
-//                     to={`/student-course/${course.id}/${module.id}/${nextLesson.id}/learn`}
-//                     className="text-yellow-500 font-medium"
-//                   >
-//                     Next →
-//                   </Link>
-//                 )}
-//               </div>
-//             </div>
-
-//             {/* VIDEO */}
-//             <div className="flex justify-center">
-//               <div className="w-full max-w-5xl">
-//                 <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-//                   {/* Proper 16:9 Ratio */}
-//                   <div className="relative bg-black aspect-video">
-//                     <video
-//                       ref={videoRef}
-//                       onTimeUpdate={handleTimeUpdate}
-//                       onLoadedMetadata={handleTimeUpdate}
-//                       className="w-full h-full object-contain"
-//                       onClick={togglePlay}
-//                     >
-//                       <source
-//                         src="https://www.w3schools.com/html/mov_bbb.mp4"
-//                         type="video/mp4"
-//                       />
-//                     </video>
-
-//                     {!playing && (
-//                       <button
-//                         onClick={togglePlay}
-//                         className="absolute inset-0 flex items-center justify-center bg-black/20"
-//                       >
-//                         <div className="bg-white rounded-full p-6 shadow-xl">
-//                           <Play className="w-10 h-10 text-gray-900 fill-gray-900" />
-//                         </div>
-//                       </button>
-//                     )}
-//                   </div>
-
-//                   {/* CONTROLS */}
-//                   <div className="px-6 py-4 border-t border-gray-100 bg-white">
-//                     <div className="flex items-center gap-4">
-//                       <button onClick={togglePlay}>
-//                         {playing ? (
-//                           <Pause className="w-5 h-5" />
-//                         ) : (
-//                           <Play className="w-5 h-5 fill-gray-700" />
-//                         )}
-//                       </button>
-
-//                       <Volume2 className="w-5 h-5 text-gray-700" />
-
-//                       <span className="text-sm text-gray-600 min-w-[60px]">
-//                         {formatTime(currentTime)}
-//                       </span>
-
-//                       <div
-//                         className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden cursor-pointer"
-//                         onClick={handleProgressClick}
-//                       >
-//                         <div
-//                           className="bg-yellow-400 h-full"
-//                           style={{ width: `${progress}%` }}
-//                         />
-//                       </div>
-
-//                       <span className="text-sm text-gray-600 min-w-[60px] text-right">
-//                         {formatTime(duration)}
-//                       </span>
-
-//                       <div className="flex items-center gap-3">
-//                         <Download className="w-5 h-5 text-gray-700" />
-//                         <FileText className="w-5 h-5 text-gray-700" />
-//                         <Settings className="w-5 h-5 text-gray-700" />
-//                         <Maximize className="w-5 h-5 text-gray-700" />
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <Footer />
-//       </div>
-//     </>
-//   );
-// };
-
-// export default LessonPlayer;

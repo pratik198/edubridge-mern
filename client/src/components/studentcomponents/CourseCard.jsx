@@ -1,4 +1,3 @@
-
 import { AiFillStar } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +15,7 @@ export default function CourseCard({
   ///
   return (
     <div
-      onClick={() => navigate(`/student-course/${_id}`)}
+      onClick={() => navigate(`/course-details/${_id}`)}
       className="
         rounded-2xl
         p-4

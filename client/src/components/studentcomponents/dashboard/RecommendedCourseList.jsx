@@ -9,14 +9,11 @@ const RecommendedCourseList = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:5000/api/courses/my-courses",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        const res = await fetch("http://localhost:5000/api/student/courses", {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
         const data = await res.json();
         if (data.success) {

@@ -13,6 +13,22 @@ const QuizPage = () => {
   const module = course?.modules.find((m) => m._id === moduleId);
   const lesson = module?.lessons.find((l) => l._id === lessonId);
 
+  // ================= NAVIGATION LOGIC =================
+  const currentLessonIndex = module.lessons.findIndex(
+    (l) => l._id === lesson._id,
+  );
+
+  let prevLesson = null;
+  let nextLesson = null;
+
+  if (currentLessonIndex > 0) {
+    prevLesson = module.lessons[currentLessonIndex - 1];
+  }
+
+  if (currentLessonIndex < module.lessons.length - 1) {
+    nextLesson = module.lessons[currentLessonIndex + 1];
+  }
+
   if (!course || !module || !lesson)
     return <div className="pt-24 px-10">Quiz not found</div>;
 
@@ -86,12 +102,33 @@ const QuizPage = () => {
               <h1 className="text-2xl font-semibold">{lesson.title}</h1>
 
               <div className="flex gap-6 text-sm">
-                <Link className="text-gray-500 hover:text-gray-700">
-                  ← Previous
-                </Link>
-                <Link className="text-yellow-500 hover:text-yellow-600 font-medium">
-                  Next →
-                </Link>
+                {/* PREVIOUS */}
+                {prevLesson && (
+                  <Link
+                    to={
+                      prevLesson.type === "quiz"
+                        ? `/student-course/${course._id}/${module._id}/${prevLesson._id}/quiz`
+                        : `/student-course/${course._id}/${module._id}/${prevLesson._id}/learn`
+                    }
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ← Previous
+                  </Link>
+                )}
+
+                {/* NEXT */}
+                {nextLesson && (
+                  <Link
+                    to={
+                      nextLesson.type === "quiz"
+                        ? `/student-course/${course._id}/${module._id}/${nextLesson._id}/quiz`
+                        : `/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`
+                    }
+                    className="text-yellow-500 hover:text-yellow-600 font-medium"
+                  >
+                    Next →
+                  </Link>
+                )}
               </div>
             </div>
 

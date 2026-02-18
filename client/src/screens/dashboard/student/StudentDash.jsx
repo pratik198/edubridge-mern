@@ -14,15 +14,6 @@ const StudentDash = () => {
 
       {/* DASHBOARD CONTENT */}
       <section className="px-6 md:px-10 pb-16 mt-10 space-y-14">
-        {/* Monthly Engagement (Full Width) */}
-        {/* <MonthlyEngagementBar /> */}
-
-        {/* Bottom Charts */}
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <CourseCompletionPie />
-          <StudentGrowthArea />
-        </div> */}
-
         {/* 🔥 Latest / New Courses (inside dashboard) */}
         <ActiveCourseList />
         <CourseCompletionList />
