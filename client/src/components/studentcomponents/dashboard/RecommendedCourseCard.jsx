@@ -1,10 +1,19 @@
+import { useNavigate } from "react-router-dom";
+
 const RecommendedCourseCard = ({ course }) => {
+  const navigate = useNavigate();
+
   if (!course) return null;
+
+  const handleNavigate = () => {
+    navigate(`/course-details/${course._id}`);
+  };
 
   return (
     <div
+      onClick={handleNavigate}
       className="
- rounded-2xl
+        rounded-2xl
         p-4
         bg-white
         border
@@ -14,25 +23,20 @@ const RecommendedCourseCard = ({ course }) => {
         hover:-translate-y-1
         transition-all
         duration-300
-        cursor-pointer  
+        cursor-pointer
       "
     >
-      {/* Image */}
       <img
         src={course.image}
         alt={course.title}
         className="w-full h-44 object-cover rounded-lg"
       />
 
-      {/* Content */}
       <div className="mt-4">
-        {/* Instructor */}
         <p className="text-sm text-gray-500">{course.instructor}</p>
 
-        {/* Title */}
         <h3 className="font-semibold text-gray-900 mt-1">{course.title}</h3>
 
-        {/* Rating + Duration + Level */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
           <span className="text-yellow-500">★</span>
           <span>{course.rating}</span>
