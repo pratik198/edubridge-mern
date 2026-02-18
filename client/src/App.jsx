@@ -45,6 +45,7 @@ const App = () => {
         path="/student-course/:courseId/:moduleId/:lessonId"
         element={<CourseDetails />}
       />
+    
       <Route
         path="/student-course/:courseId/:moduleId/:lessonId/learn"
         element={<LessonPlayer />}
