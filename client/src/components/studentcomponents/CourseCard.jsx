@@ -13,6 +13,7 @@ export default function CourseCard({
 }) {
   const navigate = useNavigate();
 
+  ///
   return (
     <div
       onClick={() => navigate(`/student-course/${_id}`)}
