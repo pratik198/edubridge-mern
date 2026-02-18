@@ -1,15 +1,21 @@
+
 import { AiFillStar } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 
 export default function CourseCard({
-  image = "https://picsum.photos/400/300",
+  _id,
+  thumbnail,
   author = "Course Instructor",
   title = "Course Title",
   rating = "4.8",
   duration = "5h 30m",
   level = "Beginner",
 }) {
+  const navigate = useNavigate();
+
   return (
     <div
+      onClick={() => navigate(`/student-course/${_id}`)}
       className="
         rounded-2xl
         p-4
@@ -27,7 +33,11 @@ export default function CourseCard({
       {/* IMAGE */}
       <div className="overflow-hidden rounded-xl">
         <img
-          src={image}
+          src={
+            thumbnail && thumbnail !== ""
+              ? thumbnail
+              : "https://picsum.photos/400/300"
+          }
           alt={title}
           className="w-full h-48 object-cover hover:scale-105 transition duration-500"
         />

@@ -13,6 +13,7 @@ const userRoutes = require("./routes/userRoutes");
 const assessmentRoutes = require("./routes/assessmentRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 const app = express();
 
 
@@ -35,6 +36,7 @@ app.use("/api/assessment", assessmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
 
+app.use("/api/student", studentRoutes);
 // ===== Health Check Route =====
 app.get("/", (req, res) => {
   res.send("Backend API working 🚀");
