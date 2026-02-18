@@ -18,9 +18,9 @@ import {
 const LessonPlayer = () => {
   const { courseId, moduleId, lessonId } = useParams();
 
-  const course = courses.find((c) => c.id === Number(courseId));
-  const module = course?.modules.find((m) => m.id === Number(moduleId));
-  const lesson = module?.lessons.find((l) => l.id === Number(lessonId));
+  const course = courses.find((c) => c._id === courseId);
+  const module = course?.modules.find((m) => m._id === moduleId);
+  const lesson = module?.lessons.find((l) => l._id === lessonId);
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -237,8 +237,9 @@ const LessonPlayer = () => {
   }, [showSpeedMenu]);
 
   const currentLessonIndex = module.lessons.findIndex(
-    (l) => l.id === lesson.id,
+    (l) => l._id === lesson._id,
   );
+
   const nextLesson = module.lessons[currentLessonIndex + 1];
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
@@ -281,14 +282,14 @@ const LessonPlayer = () => {
               <div className="mt-4 space-y-3">
                 {module.lessons.map((l) => (
                   <Link
-                    key={l.id}
+                    key={l._id}
                     to={
                       l.type === "quiz"
-                        ? `/student-course/${course.id}/${module.id}/${l.id}/quiz`
-                        : `/student-course/${course.id}/${module.id}/${l.id}/learn`
+                        ? `/student-course/${course._id}/${module._id}/${l._id}/quiz`
+                        : `/student-course/${course._id}/${module._id}/${l._id}/learn`
                     }
                     className={`block rounded-lg p-4 border transition-all ${
-                      l.id === lesson.id
+                      l._id === lesson._id
                         ? "bg-gray-200 border-gray-300"
                         : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                     }`}

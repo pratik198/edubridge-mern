@@ -8,9 +8,10 @@ const QuizPage = () => {
   const storageKey = `quiz-score-${courseId}-${moduleId}-${lessonId}`;
   const savedScore = localStorage.getItem(storageKey);
 
-  const course = courses.find((c) => c.id === Number(courseId));
-  const module = course?.modules.find((m) => m.id === Number(moduleId));
-  const lesson = module?.lessons.find((l) => l.id === Number(lessonId));
+  // ✅ FIXED: use _id and remove Number()
+  const course = courses.find((c) => c._id === courseId);
+  const module = course?.modules.find((m) => m._id === moduleId);
+  const lesson = module?.lessons.find((l) => l._id === lessonId);
 
   if (!course || !module || !lesson)
     return <div className="pt-24 px-10">Quiz not found</div>;
@@ -32,7 +33,9 @@ const QuizPage = () => {
               </h2>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Module {module.id}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  Module {module._id}
+                </p>
                 <h3 className="text-sm font-medium text-gray-800">
                   {module.title}
                 </h3>
@@ -41,14 +44,14 @@ const QuizPage = () => {
               <div className="mt-4 space-y-3">
                 {module.lessons.map((l) => (
                   <Link
-                    key={l.id}
+                    key={l._id}
                     to={
                       l.type === "quiz"
-                        ? `/student-course/${course.id}/${module.id}/${l.id}/quiz`
-                        : `/student-course/${course.id}/${module.id}/${l.id}/learn`
+                        ? `/student-course/${course._id}/${module._id}/${l._id}/quiz`
+                        : `/student-course/${course._id}/${module._id}/${l._id}/learn`
                     }
                     className={`block rounded-lg p-4 border transition-all ${
-                      l.id === lesson.id
+                      l._id === lesson._id
                         ? "bg-gray-200 border-gray-300"
                         : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                     }`}
@@ -92,7 +95,7 @@ const QuizPage = () => {
               </div>
             </div>
 
-            {/* ===== QUIZ INFO CARD (DESIGN SAME) ===== */}
+            {/* QUIZ INFO CARD */}
             <div className="bg-white border border-yellow-400 rounded-xl p-6 flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-semibold">{lesson.title}</h2>
@@ -101,16 +104,15 @@ const QuizPage = () => {
                 </p>
               </div>
 
-              {/* ONLY CHANGE: Link instead of state */}
               <Link
-                to={`/student-course/${course.id}/${module.id}/${lesson.id}/quiz/attempt`}
+                to={`/student-course/${course._id}/${module._id}/${lesson._id}/quiz/attempt`}
                 className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md font-medium"
               >
                 Start
               </Link>
             </div>
 
-            {/* ===== GRADE CARD (UNCHANGED) ===== */}
+            {/* GRADE CARD */}
             <div className="mt-6 bg-gray-50 border border-gray-200 rounded-xl p-6">
               <h3 className="font-medium">Your grade</h3>
 

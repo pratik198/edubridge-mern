@@ -16,7 +16,7 @@ const EnrolledCourses = () => {
 
   // ✅ ALL COURSES OPEN BY DEFAULT
   const [openCourses, setOpenCourses] = useState(
-    courses.map((course) => course.id),
+    courses.map((course) => course._id),
   );
 
   const toggleCourse = (id) => {
@@ -80,13 +80,13 @@ const EnrolledCourses = () => {
           {/* COURSES */}
           <div className="space-y-8">
             {courses.map((course) => {
-              const isOpen = openCourses.includes(course.id);
+              const isOpen = openCourses.includes(course._id);
 
               return (
                 <div key={course.id}>
                   {/* HEADER */}
                   <div
-                    onClick={() => toggleCourse(course.id)}
+                    onClick={() => toggleCourse(course._id)}
                     className="flex justify-between items-center cursor-pointer border-b border-gray-300 pb-2"
                   >
                     <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ const EnrolledCourses = () => {
 
                         return (
                           <div
-                            key={module.id}
+                            key={module._id}
                             className="bg-gray-50 border border-gray-300 rounded-lg px-5 py-4 flex justify-between items-center"
                           >
                             <div className="w-[70%]">
@@ -155,7 +155,7 @@ const EnrolledCourses = () => {
 
                             {/* NAVIGATION */}
                             <Link
-                              to={`/student-course/${course.id}/${module.id}/${module.lessons[0].id}`}
+                              to={`/student-course/${course._id}/${module._id}/${module.lessons[0]._id}`}
                               className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md text-sm font-medium"
                             >
                               {buttonText}

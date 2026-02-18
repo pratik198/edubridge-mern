@@ -1,5 +1,3 @@
-
-
 // import {
 //   useReactTable,
 //   getCoreRowModel,
@@ -128,7 +126,6 @@
 
 // export default MyCoursesTable;
 
-
 import {
   useReactTable,
   getCoreRowModel,
@@ -142,7 +139,8 @@ const MyCoursesTable = ({ data }) => {
   const navigate = useNavigate();
 
   const handleView = (courseId) => {
-    navigate(`/teacher/course-details/${courseId}`);
+    // navigate(`/teacher/course-details/${courseId}`);
+    navigate(`/course-details/${courseId}`);
   };
 
   const columns = [
@@ -150,43 +148,33 @@ const MyCoursesTable = ({ data }) => {
       accessorKey: "title",
       header: "Course Title",
       cell: ({ getValue }) => (
-        <span className="text-gray-800 font-medium">
-          {getValue()}
-        </span>
+        <span className="text-gray-800 font-medium">{getValue()}</span>
       ),
     },
     {
       id: "status",
       header: "Status",
-      cell: ({ row }) => (
-        <StatusBadge status={row.original.status} />
-      ),
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
     {
       id: "enrollments",
       header: "Enrollments",
       cell: ({ row }) => (
-        <span className="text-gray-800">
-          {row.original.enrollments ?? "-"}
-        </span>
+        <span className="text-gray-800">{row.original.enrollments ?? "-"}</span>
       ),
     },
     {
       id: "completion",
       header: "Completion Rate",
       cell: ({ row }) => (
-        <span className="text-gray-800">
-          {row.original.completion ?? "-"}
-        </span>
+        <span className="text-gray-800">{row.original.completion ?? "-"}</span>
       ),
     },
     {
       id: "updated",
       header: "Last Updated",
       cell: ({ row }) => (
-        <span className="text-gray-800">
-          {row.original.updated ?? "-"}
-        </span>
+        <span className="text-gray-800">{row.original.updated ?? "-"}</span>
       ),
     },
     {
@@ -232,7 +220,7 @@ const MyCoursesTable = ({ data }) => {
                 >
                   {flexRender(
                     header.column.columnDef.header,
-                    header.getContext()
+                    header.getContext(),
                   )}
                 </th>
               ))}
@@ -247,14 +235,8 @@ const MyCoursesTable = ({ data }) => {
               className="border-b border-gray-100 last:border-none hover:bg-[#fafafa] transition-colors"
             >
               {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  className="px-5 py-4 text-sm text-gray-700"
-                >
-                  {flexRender(
-                    cell.column.columnDef.cell,
-                    cell.getContext()
-                  )}
+                <td key={cell.id} className="px-5 py-4 text-sm text-gray-700">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
             </tr>
