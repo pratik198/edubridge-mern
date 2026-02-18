@@ -342,7 +342,7 @@ const LessonPlayer = () => {
                 <h1 className="text-2xl font-semibold">{lesson.title}</h1>
                 {nextLesson && (
                   <Link
-                    to={`/student-course/${course.id}/${module.id}/${nextLesson.id}/learn`}
+                    to={`/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`}
                     className="text-yellow-500 font-medium"
                   >
                     Next →
