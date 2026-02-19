@@ -6,6 +6,7 @@ const {
   getAllPublishedCourses,
   getSinglePublishedCourse,
   updateLessonProgress,
+  getCompletedCourses
 } = require("../controllers/studentController");
 
 const auth = require("../middleware/authMiddleware");
@@ -37,5 +38,7 @@ router.put(
   updateLessonProgress
 );
 
+
+router.get("/completed-courses", auth, getCompletedCourses);
 
 module.exports = router;
