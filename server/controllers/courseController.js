@@ -5,14 +5,8 @@ const Course = require("../models/Course");
 
 exports.createCourse = async (req, res) => {
   try {
-    const {
-      title,
-      shortDescription,
-      category,
-      level,
-      duration,
-      thumbnail,
-    } = req.body;
+    const { title, shortDescription, category, level, duration, thumbnail } =
+      req.body;
 
     const course = await Course.create({
       title,
@@ -36,7 +30,6 @@ exports.createCourse = async (req, res) => {
     });
   }
 };
-
 
 // ============================
 // 2️⃣ Add Module
@@ -87,11 +80,6 @@ exports.addModule = async (req, res) => {
   }
 };
 
-
-
-
-
-
 // Publish Course
 
 exports.publishCourse = async (req, res) => {
@@ -101,7 +89,7 @@ exports.publishCourse = async (req, res) => {
     const course = await Course.findByIdAndUpdate(
       courseId,
       { isPublished: true },
-      { new: true }
+      { new: true },
     );
 
     res.status(200).json({
@@ -113,7 +101,6 @@ exports.publishCourse = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // ============================
 // 5️⃣ Get Teacher Courses
@@ -140,11 +127,9 @@ exports.updateCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-    const updatedCourse = await Course.findByIdAndUpdate(
-      courseId,
-      req.body,
-      { new: true }
-    );
+    const updatedCourse = await Course.findByIdAndUpdate(courseId, req.body, {
+      new: true,
+    });
 
     if (!updatedCourse) {
       return res.status(404).json({
@@ -165,7 +150,6 @@ exports.updateCourse = async (req, res) => {
     });
   }
 };
-
 
 // ============================
 // 4️⃣ Add Quiz
@@ -227,7 +211,6 @@ exports.addQuiz = async (req, res) => {
       message: "Quiz added successfully",
       course,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -235,7 +218,6 @@ exports.addQuiz = async (req, res) => {
     });
   }
 };
-
 
 // DELETE COURSE
 exports.deleteCourse = async (req, res) => {
@@ -332,7 +314,6 @@ exports.addLesson = async (req, res) => {
       message: "Lesson added successfully",
       course,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -370,7 +351,7 @@ exports.deleteQuiz = async (req, res) => {
     }
 
     module.quizzes = module.quizzes.filter(
-      (quiz) => quiz._id.toString() !== quizId
+      (quiz) => quiz._id.toString() !== quizId,
     );
 
     await course.save();
@@ -380,7 +361,6 @@ exports.deleteQuiz = async (req, res) => {
       message: "Quiz deleted successfully",
       course,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -393,9 +373,7 @@ exports.deleteQuiz = async (req, res) => {
 // =============================
 exports.getAllStudents = async (req, res) => {
   try {
-    const students = await User.find({ role: "student" }).select(
-      "-password"
-    );
+    const students = await User.find({ role: "student" }).select("-password");
 
     res.status(200).json({
       success: true,
@@ -444,7 +422,6 @@ exports.enrollCourse = async (req, res) => {
       message: "Enrolled successfully",
       courseId: course._id,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -456,7 +433,6 @@ exports.enrollCourse = async (req, res) => {
 // ============================
 // GET STUDENT ENROLLED COURSES
 // ============================
-
 
 // exports.getMyEnrolledCourses = async (req, res) => {
 //   try {
@@ -528,7 +504,6 @@ exports.enrollCourse = async (req, res) => {
 //   }
 // };
 
-
 exports.getMyEnrolledCourses = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -539,12 +514,10 @@ exports.getMyEnrolledCourses = async (req, res) => {
     });
 
     const formattedCourses = courses.map((course) => {
-
       const modules = course.modules.map((module) => {
-
         const lessonPercents = module.lessons.map((lesson) => {
           const userProgress = lesson.progressBy.find(
-            (p) => p.userId.toString() === userId
+            (p) => p.userId.toString() === userId,
           );
           return userProgress ? userProgress.percent : 0;
         });
@@ -554,7 +527,7 @@ exports.getMyEnrolledCourses = async (req, res) => {
             ? 0
             : Math.floor(
                 lessonPercents.reduce((a, b) => a + b, 0) /
-                  lessonPercents.length
+                  lessonPercents.length,
               );
 
         return {
@@ -574,13 +547,13 @@ exports.getMyEnrolledCourses = async (req, res) => {
         modulePercents.length === 0
           ? 0
           : Math.floor(
-              modulePercents.reduce((a, b) => a + b, 0) /
-                modulePercents.length
+              modulePercents.reduce((a, b) => a + b, 0) / modulePercents.length,
             );
 
       return {
         _id: course._id,
         title: course.title,
+        thumbnail: course.thumbnail, // ✅ added
         duration: course.duration,
         progress: courseProgress,
         modules,
@@ -591,7 +564,6 @@ exports.getMyEnrolledCourses = async (req, res) => {
       success: true,
       courses: formattedCourses,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -599,9 +571,76 @@ exports.getMyEnrolledCourses = async (req, res) => {
     });
   }
 };
+// exports.getMyEnrolledCourses = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
 
+//     const courses = await Course.find({
+//       enrolledStudents: userId,
+//       isPublished: true,
+//     });
 
+//     const formattedCourses = courses.map((course) => {
 
+//       const modules = course.modules.map((module) => {
+
+//         const lessonPercents = module.lessons.map((lesson) => {
+//           const userProgress = lesson.progressBy.find(
+//             (p) => p.userId.toString() === userId
+//           );
+//           return userProgress ? userProgress.percent : 0;
+//         });
+
+//         const moduleProgress =
+//           lessonPercents.length === 0
+//             ? 0
+//             : Math.floor(
+//                 lessonPercents.reduce((a, b) => a + b, 0) /
+//                   lessonPercents.length
+//               );
+
+//         return {
+//           _id: module._id,
+//           title: module.title,
+//           progress: moduleProgress,
+//           lessons: module.lessons.map((lesson) => ({
+//             _id: lesson._id,
+//           })),
+//         };
+//       });
+
+//       // 🔥 Course level progress
+//       const modulePercents = modules.map((m) => m.progress);
+
+//       const courseProgress =
+//         modulePercents.length === 0
+//           ? 0
+//           : Math.floor(
+//               modulePercents.reduce((a, b) => a + b, 0) /
+//                 modulePercents.length
+//             );
+
+//       return {
+//         _id: course._id,
+//         title: course.title,
+//         duration: course.duration,
+//         progress: courseProgress,
+//         modules,
+//       };
+//     });
+
+//     res.status(200).json({
+//       success: true,
+//       courses: formattedCourses,
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 exports.getStudentCourse = async (req, res) => {
   try {
@@ -623,7 +662,6 @@ exports.getStudentCourse = async (req, res) => {
       success: true,
       course,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -631,4 +669,3 @@ exports.getStudentCourse = async (req, res) => {
     });
   }
 };
-
