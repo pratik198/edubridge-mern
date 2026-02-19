@@ -6,6 +6,7 @@ const {
   createComment,
   getLessonComments,
   deleteComment,
+  updateComment
 } = require("../controllers/commentController");
 
 router.post("/", auth, createComment);
@@ -16,6 +17,10 @@ router.get(
   getLessonComments
 );
 
+router.put("/:id", auth, updateComment);
+
 router.delete("/:id", auth, deleteComment);
 
 module.exports = router;
+
+

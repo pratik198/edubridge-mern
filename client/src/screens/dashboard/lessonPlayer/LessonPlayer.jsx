@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
 import Footer from "../../../components/studentcomponents/Footer";
+import FeedbackStudent from "../FeedbackStudent";
 import {
   FileText,
   Settings,
@@ -472,7 +473,9 @@ useEffect(() => {
                     </div>
                   )}
 
-                  
+                  <div>
+                    <FeedbackStudent/>
+                  </div>
 
                 </div>
               </div>

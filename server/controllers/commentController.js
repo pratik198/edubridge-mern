@@ -88,3 +88,39 @@ exports.deleteComment = async (req, res) => {
     });
   }
 };
+
+
+exports.updateComment = async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.id);
+
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: "Comment not found",
+      });
+    }
+
+    // Only owner can edit
+    if (comment.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Not allowed",
+      });
+    }
+
+    comment.message = req.body.message;
+    await comment.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Comment updated",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
