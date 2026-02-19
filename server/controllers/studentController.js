@@ -200,3 +200,87 @@ exports.updateLessonProgress = async (req, res) => {
   }
 };
 
+
+/* ======================================================
+   4️⃣ GET COMPLETED COURSES (ENROLLED + FULLY DONE)
+====================================================== */
+
+/* ======================================================
+   4️⃣ GET COMPLETED COURSES 
+   (ENROLLED + ALL LESSONS 100%)
+====================================================== */
+
+exports.getCompletedCourses = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // 🔒 Only courses where user is enrolled
+    const courses = await Course.find({
+      enrolledStudents: userId,
+      isPublished: true,
+    });
+
+    const completedCourses = [];
+
+    for (const course of courses) {
+
+      let courseComplete = true;
+
+      const formattedModules = [];
+
+      for (const module of course.modules) {
+
+        let moduleComplete = true;
+        const formattedLessons = [];
+
+        for (const lesson of module.lessons) {
+
+          // 🔎 Find user progress
+          const userProgress = lesson.progressBy.find(
+            (p) => p.userId.toString() === userId
+          );
+
+          const percent = userProgress ? userProgress.percent : 0;
+
+          if (percent < 100) {
+            moduleComplete = false;
+            courseComplete = false;
+          }
+
+          formattedLessons.push({
+            _id: lesson._id,
+          });
+        }
+
+        formattedModules.push({
+          _id: module._id,
+          title: module.title,
+          progress: moduleComplete ? 100 : 0,
+          lessons: formattedLessons,
+        });
+      }
+
+      // ✅ If ALL modules 100 → Course complete
+      if (courseComplete && course.modules.length > 0) {
+        completedCourses.push({
+          _id: course._id,
+          title: course.title,
+          duration: course.duration,
+          progress: 100,
+          modules: formattedModules,
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      completedCourses,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
