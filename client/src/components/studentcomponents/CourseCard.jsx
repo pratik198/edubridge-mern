@@ -15,7 +15,8 @@ export default function CourseCard({
   ///
   return (
     <div
-      onClick={() => navigate(`/course-details/${_id}`)}
+      // onClick={() => navigate(`/course-details/${_id}`)}
+      onClick={()=>navigate(`/CourseDetailsForStudent/${_id}`)}
       className="
         rounded-2xl
         p-4

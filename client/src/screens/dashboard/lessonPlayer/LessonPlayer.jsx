@@ -1,14 +1,13 @@
-// import { useParams, Link } from "react-router-dom";
+
+// import { useParams, Link, useNavigate } from "react-router-dom";
 // import { useRef, useState, useEffect } from "react";
 // import Navbar from "../../../components/studentcomponents/Navbar";
 // import Footer from "../../../components/studentcomponents/Footer";
-// import { courses } from "../../../data/courses";
 // import {
 //   Play,
 //   Pause,
 //   Volume2,
 //   VolumeX,
-//   Download,
 //   FileText,
 //   Settings,
 //   Maximize,
@@ -17,17 +16,13 @@
 
 // const LessonPlayer = () => {
 //   const { courseId, moduleId, lessonId } = useParams();
-
-//   const course = courses.find((c) => c._id === courseId);
-//   const moduleIndex = course?.modules.findIndex((m) => m._id === moduleId);
-//   const module = course?.modules[moduleIndex];
-
-//   const lessonIndex = module?.lessons.findIndex((l) => l._id === lessonId);
-//   const lesson = module?.lessons[lessonIndex];
+//   const navigate = useNavigate();
+//   const token = localStorage.getItem("token");
 
 //   const videoRef = useRef(null);
 //   const containerRef = useRef(null);
 
+//   const [course, setCourse] = useState(null);
 //   const [playing, setPlaying] = useState(false);
 //   const [progress, setProgress] = useState(0);
 //   const [currentTime, setCurrentTime] = useState(0);
@@ -37,32 +32,130 @@
 //   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 //   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 //   const [isFullscreen, setIsFullscreen] = useState(false);
+//   const [completedLessons, setCompletedLessons] = useState([]);
+//   const [markedComplete, setMarkedComplete] = useState(false);
 
-//   if (!course || !module || !lesson)
-//     return <div className="pt-24 px-10">Not found</div>;
+//   // ================= FETCH COURSE =================
+//   useEffect(() => {
+//     const fetchCourse = async () => {
+//       try {
+//         const res = await fetch(
+//           `http://localhost:5000/api/courses/student/${courseId}`,
+//           {
+//             headers: { Authorization: `Bearer ${token}` },
+//           }
+//         );
 
-//   /* ================= NEXT LESSON LOGIC ================= */
+//         const data = await res.json();
 
+//         if (data.success) {
+//           setCourse(data.course);
+//           // Load completed lessons from response if available
+//           if (data.completedLessons) {
+//             setCompletedLessons(data.completedLessons);
+//           }
+//         } else {
+//           navigate("/s-enrolled-courses");
+//         }
+//       } catch (err) {
+//         console.error(err);
+//       }
+//     };
+
+//     fetchCourse();
+//   }, [courseId]);
+
+//   // ================= FULLSCREEN LISTENER =================
+//   useEffect(() => {
+//     const handleFullscreenChange = () => {
+//       setIsFullscreen(!!document.fullscreenElement);
+//     };
+//     document.addEventListener("fullscreenchange", handleFullscreenChange);
+//     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+//   }, []);
+
+//   // ================= RESET ON LESSON CHANGE =================
+//   useEffect(() => {
+//     if (videoRef.current) {
+//       videoRef.current.load();
+//       setPlaying(false);
+//       setCurrentTime(0);
+//       setProgress(0);
+//       setMarkedComplete(false);
+//     }
+//   }, [lessonId]);
+
+//   if (!course) return <div className="pt-24 px-10">Loading...</div>;
+
+//   const moduleIndex = course.modules.findIndex((m) => m._id === moduleId);
+//   const module = course.modules[moduleIndex];
+//   if (!module) return <div className="pt-24 px-10">Module not found</div>;
+
+//   // ✅ Merge lessons + quizzes properly
+//   const combinedLessons = [
+//     ...module.lessons.map((l) => ({ ...l, type: "video" })),
+//     ...module.quizzes.map((q) => ({
+//       ...q,
+//       type: "quiz",
+//       duration: "Quiz",
+//     })),
+//   ];
+
+//   const lessonIndex = combinedLessons.findIndex((l) => l._id === lessonId);
+//   const lesson = combinedLessons[lessonIndex];
+
+//   if (!lesson) return <div className="pt-24 px-10">Lesson not found</div>;
+
+//   // ================= NEXT / PREV =================
 //   let nextLesson = null;
+//   let nextModuleId = moduleId;
 //   let prevLesson = null;
+//   let prevModuleId = moduleId;
 
-//   // NEXT
-//   if (lessonIndex < module.lessons.length - 1) {
-//     nextLesson = module.lessons[lessonIndex + 1];
+//   if (lessonIndex < combinedLessons.length - 1) {
+//     nextLesson = combinedLessons[lessonIndex + 1];
+//     nextModuleId = moduleId;
 //   } else if (moduleIndex < course.modules.length - 1) {
 //     const nextModule = course.modules[moduleIndex + 1];
-//     nextLesson = nextModule.lessons[0];
+//     nextLesson = nextModule.lessons[0] || nextModule.quizzes[0] || null;
+//     nextModuleId = nextModule._id;
 //   }
 
-//   // PREVIOUS
 //   if (lessonIndex > 0) {
-//     prevLesson = module.lessons[lessonIndex - 1];
+//     prevLesson = combinedLessons[lessonIndex - 1];
+//     prevModuleId = moduleId;
 //   } else if (moduleIndex > 0) {
 //     const prevModule = course.modules[moduleIndex - 1];
-//     prevLesson = prevModule.lessons[prevModule.lessons.length - 1];
+//     const prevCombined = [
+//       ...prevModule.lessons.map((l) => ({ ...l, type: "video" })),
+//       ...prevModule.quizzes.map((q) => ({ ...q, type: "quiz" })),
+//     ];
+//     prevLesson = prevCombined[prevCombined.length - 1] || null;
+//     prevModuleId = prevModule._id;
 //   }
 
-//   /* ================= VIDEO CONTROLS ================= */
+//   // ================= MARK LESSON COMPLETE =================
+//   const markLessonComplete = async () => {
+//     if (markedComplete) return;
+//     try {
+//       const res = await fetch(
+//         `http://localhost:5000/api/courses/${courseId}/${moduleId}/${lessonId}/complete`,
+//         {
+//           method: "POST",
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+//       const data = await res.json();
+//       if (data.success) {
+//         setMarkedComplete(true);
+//         setCompletedLessons((prev) => [...prev, lessonId]);
+//       }
+//     } catch (err) {
+//       console.error("Failed to mark lesson complete:", err);
+//     }
+//   };
+
+//   // ================= VIDEO CONTROLS =================
 
 //   const togglePlay = () => {
 //     if (!videoRef.current) return;
@@ -77,6 +170,35 @@
 //     setCurrentTime(current);
 //     setDuration(dur);
 //     setProgress((current / dur) * 100);
+
+//     // Auto-mark complete when 90% watched
+//     if (dur > 0 && current / dur >= 0.9 && !markedComplete) {
+//       markLessonComplete();
+//     }
+//   };
+
+//   const handleVideoEnded = () => {
+//     setPlaying(false);
+//     markLessonComplete();
+
+//     // Auto-navigate to next lesson after 2 seconds
+//     if (nextLesson) {
+//       setTimeout(() => {
+//         const path =
+//           nextLesson.type === "quiz"
+//             ? `/student-course/${course._id}/${nextModuleId}/${nextLesson._id}/quiz`
+//             : `/student-course/${course._id}/${nextModuleId}/${nextLesson._id}/learn`;
+//         navigate(path);
+//       }, 2000);
+//     }
+//   };
+
+//   const handleProgressClick = (e) => {
+//     if (!videoRef.current) return;
+//     const rect = e.currentTarget.getBoundingClientRect();
+//     const x = e.clientX - rect.left;
+//     const percentage = x / rect.width;
+//     videoRef.current.currentTime = percentage * videoRef.current.duration;
 //   };
 
 //   const formatTime = (seconds) => {
@@ -86,14 +208,51 @@
 //     return `${mins}:${secs.toString().padStart(2, "0")}`;
 //   };
 
-//   useEffect(() => {
-//     if (videoRef.current) {
-//       videoRef.current.load();
-//       setPlaying(false);
-//       setCurrentTime(0);
-//       setProgress(0);
+//   const toggleMute = () => {
+//     if (!videoRef.current) return;
+//     if (isMuted) {
+//       videoRef.current.volume = volume;
+//       setIsMuted(false);
+//     } else {
+//       videoRef.current.volume = 0;
+//       setIsMuted(true);
 //     }
-//   }, [lessonId]);
+//   };
+
+//   const handleVolumeChange = (e) => {
+//     const val = parseFloat(e.target.value);
+//     setVolume(val);
+//     if (videoRef.current) {
+//       videoRef.current.volume = val;
+//     }
+//     setIsMuted(val === 0);
+//   };
+
+//   const handleSpeedChange = (speed) => {
+//     setPlaybackSpeed(speed);
+//     if (videoRef.current) {
+//       videoRef.current.playbackRate = speed;
+//     }
+//     setShowSpeedMenu(false);
+//   };
+
+//   const toggleFullscreen = () => {
+//     if (!containerRef.current) return;
+//     if (!isFullscreen) {
+//       containerRef.current.requestFullscreen();
+//     } else {
+//       document.exitFullscreen();
+//     }
+//   };
+
+//   const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
+//   const getLessonPath = (l, mId) =>
+//     l.type === "quiz"
+//       ? `/student-course/${course._id}/${mId}/${l._id}/quiz`
+//       : `/student-course/${course._id}/${mId}/${l._id}/learn`;
+
+//   const isCompleted = (id) => completedLessons.includes(id);
 
 //   return (
 //     <>
@@ -103,61 +262,88 @@
 
 //       <div className="bg-white min-h-screen pt-24 flex flex-col">
 //         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
+
 //           {/* ================= SIDEBAR ================= */}
 //           <div className="hidden md:block w-72">
 //             <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto">
-//               <h2 className="text-lg font-semibold text-gray-900 mb-6">
-//                 {course.title}
-//               </h2>
+//               <h2 className="text-lg font-semibold mb-6">{course.title}</h2>
 
-//               {module.lessons.map((l) => (
-//                 <Link
-//                   key={l._id}
-//                   to={
-//                     l.type === "quiz"
-//                       ? `/student-course/${course._id}/${module._id}/${l._id}/quiz`
-//                       : `/student-course/${course._id}/${module._id}/${l._id}/learn`
-//                   }
-//                   className={`block rounded-lg p-4 border mb-2 ${
-//                     l._id === lesson._id
-//                       ? "bg-gray-200"
-//                       : "bg-gray-50 hover:bg-gray-100"
-//                   }`}
-//                 >
-//                   {l.title}
-//                 </Link>
-//               ))}
+//               {/* All modules with their lessons */}
+//               <div className="space-y-6">
+//                 {course.modules.map((mod, modIdx) => {
+//                   const modCombined = [
+//                     ...mod.lessons.map((l) => ({ ...l, type: "video" })),
+//                     ...mod.quizzes.map((q) => ({ ...q, type: "quiz", duration: "Quiz" })),
+//                   ];
+//                   return (
+//                     <div key={mod._id}>
+//                       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+//                         Module {modIdx + 1}: {mod.title}
+//                       </p>
+//                       <div className="space-y-2">
+//                         {modCombined.map((l) => {
+//                           const isActive = l._id === lesson._id && mod._id === moduleId;
+//                           const done = isCompleted(l._id);
+//                           return (
+//                             <Link
+//                               key={l._id}
+//                               to={getLessonPath(l, mod._id)}
+//                               className={`block rounded-lg p-4 border transition-all ${
+//                                 isActive
+//                                   ? "bg-gray-200 border-gray-300"
+//                                   : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+//                               }`}
+//                             >
+//                               <div className="flex items-start gap-3">
+//                                 <div className="mt-1 flex-shrink-0">
+//                                   {done ? (
+//                                     <div className="w-6 h-6 flex items-center justify-center border rounded bg-green-100 text-green-600 text-xs font-bold">
+//                                       ✓
+//                                     </div>
+//                                   ) : l.type === "video" ? (
+//                                     <div className="w-6 h-6 flex items-center justify-center border rounded">
+//                                       ▶
+//                                     </div>
+//                                   ) : (
+//                                     <div className="w-6 h-6 flex items-center justify-center border rounded">
+//                                       ≡
+//                                     </div>
+//                                   )}
+//                                 </div>
+//                                 <div>
+//                                   <p className="text-sm font-medium">{l.title}</p>
+//                                   <p className="text-xs text-gray-500 mt-1">{l.duration}</p>
+//                                 </div>
+//                               </div>
+//                             </Link>
+//                           );
+//                         })}
+//                       </div>
+//                     </div>
+//                   );
+//                 })}
+//               </div>
 //             </div>
 //           </div>
 
 //           {/* ================= RIGHT SIDE ================= */}
 //           <div className="flex-1">
-//             <div className="mb-8 border-b border-gray-200 pb-4 flex justify-between items-center">
+//             <div className="mb-8 border-b border-gray-200 pb-4 flex justify-between">
 //               <h1 className="text-2xl font-semibold">{lesson.title}</h1>
 
 //               <div className="flex gap-6">
-//                 {/* PREVIOUS BUTTON */}
 //                 {prevLesson && (
 //                   <Link
-//                     to={
-//                       prevLesson.type === "quiz"
-//                         ? `/student-course/${course._id}/${module._id}/${prevLesson._id}/quiz`
-//                         : `/student-course/${course._id}/${module._id}/${prevLesson._id}/learn`
-//                     }
-//                     className="text-gray-600 hover:text-black font-medium"
+//                     to={getLessonPath(prevLesson, prevModuleId)}
+//                     className="text-gray-600 font-medium hover:text-black"
 //                   >
 //                     ← Previous
 //                   </Link>
 //                 )}
 
-//                 {/* NEXT BUTTON */}
 //                 {nextLesson && (
 //                   <Link
-//                     to={
-//                       nextLesson.type === "quiz"
-//                         ? `/student-course/${course._id}/${module._id}/${nextLesson._id}/quiz`
-//                         : `/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`
-//                     }
+//                     to={getLessonPath(nextLesson, nextModuleId)}
 //                     className="text-yellow-500 font-medium"
 //                   >
 //                     Next →
@@ -166,22 +352,143 @@
 //               </div>
 //             </div>
 
-//             {/* VIDEO */}
-//             {lesson.type === "video" && (
-//               <div className="max-w-4xl">
-//                 <video
-//                   ref={videoRef}
-//                   onTimeUpdate={handleTimeUpdate}
-//                   onLoadedMetadata={handleTimeUpdate}
-//                   className="w-full rounded-xl"
-//                   controls
-//                 >
-//                   <source src={lesson.videoUrl} type="video/mp4" />
-//                 </video>
+//             {/* ================= CONTENT ================= */}
 
-//                 <div className="mt-4 text-sm text-gray-500">
-//                   {formatTime(currentTime)} / {formatTime(duration)}
+//             {lesson.type === "video" ? (
+//               /* ================= VIDEO PLAYER ================= */
+//               <div className="flex justify-center">
+//                 <div className="w-full max-w-5xl">
+//                   <div
+//                     ref={containerRef}
+//                     className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
+//                   >
+//                     <div className="relative bg-black aspect-video">
+//                       <video
+//                         ref={videoRef}
+//                         onTimeUpdate={handleTimeUpdate}
+//                         onLoadedMetadata={handleTimeUpdate}
+//                         onEnded={handleVideoEnded}
+//                         className="w-full h-full object-contain"
+//                         onClick={togglePlay}
+//                       >
+//                         {lesson.videoUrl && (
+//                           <source src={lesson.videoUrl} type="video/mp4" />
+//                         )}
+//                       </video>
+
+//                       {!playing && (
+//                         <button
+//                           onClick={togglePlay}
+//                           className="absolute inset-0 flex items-center justify-center bg-black/20"
+//                         >
+//                           <div className="bg-white rounded-full p-6 shadow-xl">
+//                             <Play className="w-10 h-10 text-gray-900 fill-gray-900" />
+//                           </div>
+//                         </button>
+//                       )}
+
+//                       {/* Auto-play next overlay */}
+//                       {!playing && markedComplete && nextLesson && currentTime > 0 && duration > 0 && currentTime >= duration - 0.5 && (
+//                         <div className="absolute bottom-6 right-6 bg-black/70 text-white rounded-xl px-4 py-3 text-sm">
+//                           Next lesson loading...
+//                         </div>
+//                       )}
+//                     </div>
+
+//                     {/* CONTROLS */}
+//                     <div className="px-6 py-4 border-t bg-white">
+//                       <div className="flex flex-wrap items-center gap-4">
+//                         <button onClick={togglePlay}>
+//                           {playing ? <Pause /> : <Play />}
+//                         </button>
+
+//                         <button onClick={toggleMute}>
+//                           {isMuted ? <VolumeX /> : <Volume2 />}
+//                         </button>
+
+//                         {/* Volume slider */}
+//                         <input
+//                           type="range"
+//                           min={0}
+//                           max={1}
+//                           step={0.05}
+//                           value={isMuted ? 0 : volume}
+//                           onChange={handleVolumeChange}
+//                           className="w-20 accent-yellow-400"
+//                         />
+
+//                         <span className="text-sm">
+//                           {formatTime(currentTime)} / {formatTime(duration)}
+//                         </span>
+
+//                         <div
+//                           className="flex-1 bg-gray-200 h-1.5 rounded-full cursor-pointer"
+//                           onClick={handleProgressClick}
+//                         >
+//                           <div
+//                             className="bg-yellow-400 h-full rounded-full"
+//                             style={{ width: `${progress}%` }}
+//                           />
+//                         </div>
+
+//                         {/* Completed badge */}
+//                         {(markedComplete || isCompleted(lessonId)) && (
+//                           <span className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">
+//                             ✓ Completed
+//                           </span>
+//                         )}
+
+//                         <div className="relative">
+//                           <button onClick={() => setShowSpeedMenu(!showSpeedMenu)}>
+//                             <Settings />
+//                           </button>
+
+//                           {showSpeedMenu && (
+//                             <div className="absolute bottom-full right-0 bg-white border rounded shadow p-2 z-10">
+//                               <p className="text-xs text-gray-400 mb-1 px-1">Speed</p>
+//                               {speedOptions.map((speed) => (
+//                                 <button
+//                                   key={speed}
+//                                   onClick={() => handleSpeedChange(speed)}
+//                                   className={`block text-sm py-1 px-2 w-full text-left rounded hover:bg-gray-100 ${
+//                                     playbackSpeed === speed ? "font-bold text-yellow-500" : ""
+//                                   }`}
+//                                 >
+//                                   {speed}x
+//                                 </button>
+//                               ))}
+//                             </div>
+//                           )}
+//                         </div>
+
+//                         <button onClick={toggleFullscreen}>
+//                           {isFullscreen ? <Minimize /> : <Maximize />}
+//                         </button>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   {/* Lesson description if available */}
+//                   {lesson.description && (
+//                     <div className="mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+//                       <h3 className="text-base font-semibold mb-2">About this lesson</h3>
+//                       <p className="text-sm text-gray-600">{lesson.description}</p>
+//                     </div>
+//                   )}
 //                 </div>
+//               </div>
+//             ) : (
+//               /* ================= QUIZ VIEW ================= */
+//               <div className="bg-white border rounded-2xl shadow-md p-10 text-center">
+//                 <FileText className="mx-auto mb-4 w-10 h-10 text-gray-700" />
+//                 <h2 className="text-xl font-semibold mb-4">{lesson.title}</h2>
+
+//                 <Link
+//                   to={`/student-course/${course._id}/${module._id}/${lesson._id}/quiz`}
+//                   className="bg-yellow-400 hover:bg-yellow-500 px-6 py-3 rounded-md font-medium"
+//                 >
+//                   Start Quiz
+//                 </Link>
 //               </div>
 //             )}
 //           </div>
@@ -195,32 +502,46 @@
 
 // export default LessonPlayer;
 
-import { useParams, Link } from "react-router-dom";
+
+
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
 import Footer from "../../../components/studentcomponents/Footer";
-import { courses } from "../../../data/courses";
 import {
   Play,
   Pause,
   Volume2,
   VolumeX,
-  Download,
   FileText,
   Settings,
   Maximize,
   Minimize,
 } from "lucide-react";
 
+// ================= YOUTUBE HELPER =================
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/
+  );
+  if (match) {
+    return `https://www.youtube.com/embed/${match[1]}?enablejsapi=1&rel=0`;
+  }
+  return null;
+};
+
+const isYouTubeUrl = (url) => !!getYouTubeEmbedUrl(url);
+
 const LessonPlayer = () => {
   const { courseId, moduleId, lessonId } = useParams();
-
-  const course = courses.find((c) => c._id === courseId);
-  const module = course?.modules.find((m) => m._id === moduleId);
-  const lesson = module?.lessons.find((l) => l._id === lessonId);
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
+
+  const [course, setCourse] = useState(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -230,18 +551,139 @@ const LessonPlayer = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState([]);
+  const [markedComplete, setMarkedComplete] = useState(false);
 
-  if (!course || !module || !lesson)
-    return <div className="pt-24 px-10">Not found</div>;
+  // ================= FETCH COURSE =================
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/courses/student/${courseId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-  // Toggle play/pause
+        const data = await res.json();
+
+        if (data.success) {
+          setCourse(data.course);
+          if (data.completedLessons) {
+            setCompletedLessons(data.completedLessons);
+          }
+        } else {
+          navigate("/s-enrolled-courses");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCourse();
+  }, [courseId]);
+
+  // ================= FULLSCREEN LISTENER =================
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  // ================= RESET ON LESSON CHANGE =================
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      setPlaying(false);
+      setCurrentTime(0);
+      setProgress(0);
+      setMarkedComplete(false);
+    }
+    // Reset for YouTube too
+    setPlaying(false);
+    setCurrentTime(0);
+    setProgress(0);
+    setMarkedComplete(false);
+  }, [lessonId]);
+
+  if (!course) return <div className="pt-24 px-10">Loading...</div>;
+
+  const moduleIndex = course.modules.findIndex((m) => m._id === moduleId);
+  const module = course.modules[moduleIndex];
+  if (!module) return <div className="pt-24 px-10">Module not found</div>;
+
+  const combinedLessons = [
+    ...module.lessons.map((l) => ({ ...l, type: "video" })),
+    ...module.quizzes.map((q) => ({
+      ...q,
+      type: "quiz",
+      duration: "Quiz",
+    })),
+  ];
+
+  const lessonIndex = combinedLessons.findIndex((l) => l._id === lessonId);
+  const lesson = combinedLessons[lessonIndex];
+
+  if (!lesson) return <div className="pt-24 px-10">Lesson not found</div>;
+
+  // ================= NEXT / PREV =================
+  let nextLesson = null;
+  let nextModuleId = moduleId;
+  let prevLesson = null;
+  let prevModuleId = moduleId;
+
+  if (lessonIndex < combinedLessons.length - 1) {
+    nextLesson = combinedLessons[lessonIndex + 1];
+    nextModuleId = moduleId;
+  } else if (moduleIndex < course.modules.length - 1) {
+    const nextModule = course.modules[moduleIndex + 1];
+    nextLesson = nextModule.lessons[0] || nextModule.quizzes[0] || null;
+    nextModuleId = nextModule._id;
+  }
+
+  if (lessonIndex > 0) {
+    prevLesson = combinedLessons[lessonIndex - 1];
+    prevModuleId = moduleId;
+  } else if (moduleIndex > 0) {
+    const prevModule = course.modules[moduleIndex - 1];
+    const prevCombined = [
+      ...prevModule.lessons.map((l) => ({ ...l, type: "video" })),
+      ...prevModule.quizzes.map((q) => ({ ...q, type: "quiz" })),
+    ];
+    prevLesson = prevCombined[prevCombined.length - 1] || null;
+    prevModuleId = prevModule._id;
+  }
+
+  // ================= MARK LESSON COMPLETE =================
+  const markLessonComplete = async () => {
+    if (markedComplete) return;
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/courses/${courseId}/${moduleId}/${lessonId}/complete`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setMarkedComplete(true);
+        setCompletedLessons((prev) => [...prev, lessonId]);
+      }
+    } catch (err) {
+      console.error("Failed to mark lesson complete:", err);
+    }
+  };
+
+  // ================= VIDEO CONTROLS (only for direct video) =================
   const togglePlay = () => {
     if (!videoRef.current) return;
     playing ? videoRef.current.pause() : videoRef.current.play();
     setPlaying(!playing);
   };
 
-  // Handle video time updates
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
     const current = videoRef.current.currentTime;
@@ -249,9 +691,27 @@ const LessonPlayer = () => {
     setCurrentTime(current);
     setDuration(dur);
     setProgress((current / dur) * 100);
+
+    if (dur > 0 && current / dur >= 0.9 && !markedComplete) {
+      markLessonComplete();
+    }
   };
 
-  // Handle progress bar click
+  const handleVideoEnded = () => {
+    setPlaying(false);
+    markLessonComplete();
+
+    if (nextLesson) {
+      setTimeout(() => {
+        const path =
+          nextLesson.type === "quiz"
+            ? `/student-course/${course._id}/${nextModuleId}/${nextLesson._id}/quiz`
+            : `/student-course/${course._id}/${nextModuleId}/${nextLesson._id}/learn`;
+        navigate(path);
+      }, 2000);
+    }
+  };
+
   const handleProgressClick = (e) => {
     if (!videoRef.current) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -260,7 +720,6 @@ const LessonPlayer = () => {
     videoRef.current.currentTime = percentage * videoRef.current.duration;
   };
 
-  // Format time in MM:SS
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -268,7 +727,6 @@ const LessonPlayer = () => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Toggle mute
   const toggleMute = () => {
     if (!videoRef.current) return;
     if (isMuted) {
@@ -280,21 +738,15 @@ const LessonPlayer = () => {
     }
   };
 
-  // Change volume
   const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
+    const val = parseFloat(e.target.value);
+    setVolume(val);
     if (videoRef.current) {
-      videoRef.current.volume = newVolume;
+      videoRef.current.volume = val;
     }
-    if (newVolume === 0) {
-      setIsMuted(true);
-    } else {
-      setIsMuted(false);
-    }
+    setIsMuted(val === 0);
   };
 
-  // Change playback speed
   const handleSpeedChange = (speed) => {
     setPlaybackSpeed(speed);
     if (videoRef.current) {
@@ -303,163 +755,27 @@ const LessonPlayer = () => {
     setShowSpeedMenu(false);
   };
 
-  // Toggle fullscreen
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
-
     if (!isFullscreen) {
-      // Enter fullscreen
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if (containerRef.current.webkitRequestFullscreen) {
-        containerRef.current.webkitRequestFullscreen();
-      } else if (containerRef.current.mozRequestFullScreen) {
-        containerRef.current.mozRequestFullScreen();
-      } else if (containerRef.current.msRequestFullscreen) {
-        containerRef.current.msRequestFullscreen();
-      }
+      containerRef.current.requestFullscreen();
     } else {
-      // Exit fullscreen
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
+      document.exitFullscreen();
     }
   };
 
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(
-        document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement ||
-          document.msFullscreenElement,
-      );
-    };
+  const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+  const getLessonPath = (l, mId) =>
+    l.type === "quiz"
+      ? `/student-course/${course._id}/${mId}/${l._id}/quiz`
+      : `/student-course/${course._id}/${mId}/${l._id}/learn`;
 
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange,
-      );
-      document.removeEventListener(
-        "mozfullscreenchange",
-        handleFullscreenChange,
-      );
-      document.removeEventListener(
-        "MSFullscreenChange",
-        handleFullscreenChange,
-      );
-    };
-  }, []);
+  const isCompleted = (id) => completedLessons.includes(id);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (!videoRef.current) return;
-
-      switch (e.key.toLowerCase()) {
-        case " ":
-        case "k":
-          e.preventDefault();
-          togglePlay();
-          break;
-        case "f":
-          e.preventDefault();
-          toggleFullscreen();
-          break;
-        case "m":
-          e.preventDefault();
-          toggleMute();
-          break;
-        case "arrowleft":
-          e.preventDefault();
-          videoRef.current.currentTime = Math.max(
-            0,
-            videoRef.current.currentTime - 5,
-          );
-          break;
-        case "arrowright":
-          e.preventDefault();
-          videoRef.current.currentTime = Math.min(
-            videoRef.current.duration,
-            videoRef.current.currentTime + 5,
-          );
-          break;
-        case "arrowup":
-          e.preventDefault();
-          const newVolumeUp = Math.min(1, volume + 0.1);
-          setVolume(newVolumeUp);
-          videoRef.current.volume = newVolumeUp;
-          setIsMuted(false);
-          break;
-        case "arrowdown":
-          e.preventDefault();
-          const newVolumeDown = Math.max(0, volume - 0.1);
-          setVolume(newVolumeDown);
-          videoRef.current.volume = newVolumeDown;
-          if (newVolumeDown === 0) setIsMuted(true);
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [playing, volume, isFullscreen]);
-
-  // Close speed menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (showSpeedMenu && !e.target.closest(".speed-menu-container")) {
-        setShowSpeedMenu(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showSpeedMenu]);
-
-  const currentLessonIndex = module.lessons.findIndex(
-    (l) => l._id === lesson._id,
-  );
-
-  let nextLesson = null;
-  let prevLesson = null;
-
-  // NEXT lesson (same module only — keeping your original logic style)
-  if (currentLessonIndex < module.lessons.length - 1) {
-    nextLesson = module.lessons[currentLessonIndex + 1];
-  }
-
-  // PREVIOUS lesson
-  if (currentLessonIndex > 0) {
-    prevLesson = module.lessons[currentLessonIndex - 1];
-  }
-
-  const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      setPlaying(false);
-      setCurrentTime(0);
-      setProgress(0);
-    }
-  }, [lessonId]);
+  // ================= DETERMINE VIDEO TYPE =================
+  const ytEmbedUrl = lesson.type === "video" ? getYouTubeEmbedUrl(lesson.videoUrl) : null;
+  const isYT = !!ytEmbedUrl;
 
   return (
     <>
@@ -469,276 +785,279 @@ const LessonPlayer = () => {
 
       <div className="bg-white min-h-screen pt-24 flex flex-col">
         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
-          {/* SIDEBAR */}
-          {/* SIDEBAR */}
+
+          {/* ================= SIDEBAR ================= */}
           <div className="hidden md:block w-72">
-            <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              {/* Course Title */}
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                {course.title}
-              </h2>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto">
+              <h2 className="text-lg font-semibold mb-6">{course.title}</h2>
 
-              {/* Module Info */}
-              <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Module {module.id}</p>
-                <h3 className="text-sm font-medium text-gray-800">
-                  {module.title}
-                </h3>
-              </div>
-
-              {/* Lessons List */}
-              <div className="mt-4 space-y-3">
-                {module.lessons.map((l) => (
-                  <Link
-                    key={l._id}
-                    to={
-                      l.type === "quiz"
-                        ? `/student-course/${course._id}/${module._id}/${l._id}/quiz`
-                        : `/student-course/${course._id}/${module._id}/${l._id}/learn`
-                    }
-                    className={`block rounded-lg p-4 border transition-all ${
-                      l._id === lesson._id
-                        ? "bg-gray-200 border-gray-300"
-                        : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Icon */}
-                      <div className="mt-1">
-                        {l.type === "video" ? (
-                          <div className="w-6 h-6 flex items-center justify-center border border-gray-400 rounded">
-                            ▶
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 flex items-center justify-center border border-gray-400 rounded">
-                            ≡
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Title + Duration */}
-                      <div>
-                        <p
-                          className={`text-sm ${
-                            l.id === lesson.id
-                              ? "font-medium text-gray-900"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {l.title}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {l.duration} min
-                        </p>
+              <div className="space-y-6">
+                {course.modules.map((mod, modIdx) => {
+                  const modCombined = [
+                    ...mod.lessons.map((l) => ({ ...l, type: "video" })),
+                    ...mod.quizzes.map((q) => ({ ...q, type: "quiz", duration: "Quiz" })),
+                  ];
+                  return (
+                    <div key={mod._id}>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                        Module {modIdx + 1}: {mod.title}
+                      </p>
+                      <div className="space-y-2">
+                        {modCombined.map((l) => {
+                          const isActive = l._id === lesson._id && mod._id === moduleId;
+                          const done = isCompleted(l._id);
+                          return (
+                            <Link
+                              key={l._id}
+                              to={getLessonPath(l, mod._id)}
+                              className={`block rounded-lg p-4 border transition-all ${
+                                isActive
+                                  ? "bg-gray-200 border-gray-300"
+                                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="mt-1 flex-shrink-0">
+                                  {done ? (
+                                    <div className="w-6 h-6 flex items-center justify-center border rounded bg-green-100 text-green-600 text-xs font-bold">
+                                      ✓
+                                    </div>
+                                  ) : l.type === "video" ? (
+                                    <div className="w-6 h-6 flex items-center justify-center border rounded">
+                                      ▶
+                                    </div>
+                                  ) : (
+                                    <div className="w-6 h-6 flex items-center justify-center border rounded">
+                                      ≡
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">{l.title}</p>
+                                  <p className="text-xs text-gray-500 mt-1">{l.duration}</p>
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-
-              {/* Grades Section */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500">Grades</p>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
+          {/* ================= RIGHT SIDE ================= */}
           <div className="flex-1">
-            <div className="mb-8 border-b border-gray-200 pb-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold">{lesson.title}</h1>
+            <div className="mb-8 border-b border-gray-200 pb-4 flex justify-between">
+              <h1 className="text-2xl font-semibold">{lesson.title}</h1>
 
-                <div className="flex gap-6">
-                  {/* PREVIOUS BUTTON */}
-                  {prevLesson && (
-                    <Link
-                      to={
-                        prevLesson.type === "quiz"
-                          ? `/student-course/${course._id}/${module._id}/${prevLesson._id}/quiz`
-                          : `/student-course/${course._id}/${module._id}/${prevLesson._id}/learn`
-                      }
-                      className="text-gray-600 font-medium hover:text-black"
-                    >
-                      ← Previous
-                    </Link>
-                  )}
+              <div className="flex gap-6">
+                {prevLesson && (
+                  <Link
+                    to={getLessonPath(prevLesson, prevModuleId)}
+                    className="text-gray-600 font-medium hover:text-black"
+                  >
+                    ← Previous
+                  </Link>
+                )}
 
-                  {/* NEXT BUTTON */}
-                  {nextLesson && (
-                    <Link
-                      to={
-                        nextLesson.type === "quiz"
-                          ? `/student-course/${course._id}/${module._id}/${nextLesson._id}/quiz`
-                          : `/student-course/${course._id}/${module._id}/${nextLesson._id}/learn`
-                      }
-                      className="text-yellow-500 font-medium"
-                    >
-                      Next →
-                    </Link>
-                  )}
-                </div>
+                {nextLesson && (
+                  <Link
+                    to={getLessonPath(nextLesson, nextModuleId)}
+                    className="text-yellow-500 font-medium"
+                  >
+                    Next →
+                  </Link>
+                )}
               </div>
             </div>
 
-            {/* VIDEO */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-5xl">
-                <div
-                  ref={containerRef}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
-                >
-                  {/* Proper 16:9 Ratio */}
-                  <div className="relative bg-black aspect-video">
-                    <video
-                      ref={videoRef}
-                      onTimeUpdate={handleTimeUpdate}
-                      onLoadedMetadata={handleTimeUpdate}
-                      className="w-full h-full object-contain"
-                      onClick={togglePlay}
-                    >
-                      {/* <source
-                        src="https://www.w3schools.com/html/mov_bbb.mp4"
-                        type="video/mp4"
-                      /> */}
-                      {lesson.type === "video" && (
-                        <source src={lesson.videoUrl} type="video/mp4" />
-                      )}
-                    </video>
+            {/* ================= CONTENT ================= */}
 
-                    {!playing && (
-                      <button
-                        onClick={togglePlay}
-                        className="absolute inset-0 flex items-center justify-center bg-black/20"
-                      >
-                        <div className="bg-white rounded-full p-6 shadow-xl">
-                          <Play className="w-10 h-10 text-gray-900 fill-gray-900" />
-                        </div>
-                      </button>
-                    )}
-                  </div>
+            {lesson.type === "video" ? (
+              <div className="flex justify-center">
+                <div className="w-full max-w-5xl">
+                  <div
+                    ref={containerRef}
+                    className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
+                  >
+                    <div className="relative bg-black aspect-video">
 
-                  {/* CONTROLS */}
-                  <div className="px-6 py-4 border-t border-gray-100 bg-white">
-                    <div className="flex flex-wrap items-center gap-4">
-                      {/* Play/Pause */}
-                      <button
-                        onClick={togglePlay}
-                        className="text-gray-700 hover:text-gray-900 transition-colors"
-                      >
-                        {playing ? (
-                          <Pause className="w-5 h-5" />
-                        ) : (
-                          <Play className="w-5 h-5 fill-gray-700" />
-                        )}
-                      </button>
-
-                      {/* Volume Control */}
-                      <div className="flex items-center gap-2 group">
-                        <button
-                          onClick={toggleMute}
-                          className="text-gray-700 hover:text-gray-900 transition-colors"
-                        >
-                          {isMuted || volume === 0 ? (
-                            <VolumeX className="w-5 h-5" />
-                          ) : (
-                            <Volume2 className="w-5 h-5" />
-                          )}
-                        </button>
-                        <input
-                          type="range"
-                          min="0"
-                          max="1"
-                          step="0.01"
-                          value={isMuted ? 0 : volume}
-                          onChange={handleVolumeChange}
-                          className="w-0 group-hover:w-20 transition-all duration-200 accent-yellow-400"
+                      {/* ===== YOUTUBE IFRAME ===== */}
+                      {isYT ? (
+                        <iframe
+                          key={lessonId}
+                          src={ytEmbedUrl}
+                          title={lesson.title}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
                         />
-                      </div>
-
-                      {/* Current Time */}
-                      <span className="text-sm text-gray-600 min-w-[60px]">
-                        {formatTime(currentTime)}
-                      </span>
-
-                      {/* Progress Bar */}
-                      <div
-                        className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden cursor-pointer group"
-                        onClick={handleProgressClick}
-                      >
-                        <div
-                          className="bg-yellow-400 h-full transition-all relative group-hover:h-2"
-                          style={{ width: `${progress}%` }}
-                        >
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                      </div>
-
-                      {/* Duration */}
-                      <span className="text-sm text-gray-600 min-w-[60px] text-right">
-                        {formatTime(duration)}
-                      </span>
-
-                      {/* Right Controls */}
-                      <div className="flex items-center gap-3">
-                        <button className="text-gray-700 hover:text-gray-900 transition-colors">
-                          <Download className="w-5 h-5" />
-                        </button>
-                        <button className="text-gray-700 hover:text-gray-900 transition-colors">
-                          <FileText className="w-5 h-5" />
-                        </button>
-
-                        {/* Speed Settings */}
-                        <div className="relative speed-menu-container">
-                          <button
-                            onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                            className="text-gray-700 hover:text-gray-900 transition-colors"
+                      ) : (
+                        /* ===== DIRECT VIDEO ===== */
+                        <>
+                          <video
+                            ref={videoRef}
+                            onTimeUpdate={handleTimeUpdate}
+                            onLoadedMetadata={handleTimeUpdate}
+                            onEnded={handleVideoEnded}
+                            className="w-full h-full object-contain"
+                            onClick={togglePlay}
                           >
-                            <Settings className="w-5 h-5" />
-                          </button>
+                            {lesson.videoUrl && (
+                              <source src={lesson.videoUrl} type="video/mp4" />
+                            )}
+                          </video>
 
-                          {showSpeedMenu && (
-                            <div className="absolute bottom-full right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[120px]">
-                              <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b border-gray-100 mb-1">
-                                Playback Speed
+                          {!playing && (
+                            <button
+                              onClick={togglePlay}
+                              className="absolute inset-0 flex items-center justify-center bg-black/20"
+                            >
+                              <div className="bg-white rounded-full p-6 shadow-xl">
+                                <Play className="w-10 h-10 text-gray-900 fill-gray-900" />
                               </div>
-                              {speedOptions.map((speed) => (
-                                <button
-                                  key={speed}
-                                  onClick={() => handleSpeedChange(speed)}
-                                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                                    playbackSpeed === speed
-                                      ? "text-yellow-500 font-medium"
-                                      : "text-gray-700"
-                                  }`}
-                                >
-                                  {speed === 1 ? "Normal" : `${speed}x`}
-                                  {playbackSpeed === speed && (
-                                    <span className="float-right">✓</span>
-                                  )}
-                                </button>
-                              ))}
+                            </button>
+                          )}
+
+                          {!playing && markedComplete && nextLesson && currentTime > 0 && duration > 0 && currentTime >= duration - 0.5 && (
+                            <div className="absolute bottom-6 right-6 bg-black/70 text-white rounded-xl px-4 py-3 text-sm">
+                              Next lesson loading...
                             </div>
                           )}
-                        </div>
+                        </>
+                      )}
+                    </div>
 
-                        {/* Fullscreen */}
-                        <button
-                          onClick={toggleFullscreen}
-                          className="text-gray-700 hover:text-gray-900 transition-colors"
-                        >
-                          {isFullscreen ? (
-                            <Minimize className="w-5 h-5" />
-                          ) : (
-                            <Maximize className="w-5 h-5" />
-                          )}
-                        </button>
+                    {/* ===== CONTROLS ===== */}
+                    {/* For YouTube: simplified controls (just fullscreen + mark complete) */}
+                    {/* For direct video: full controls */}
+                    <div className="px-6 py-4 border-t bg-white">
+                      <div className="flex flex-wrap items-center gap-4">
+
+                        {isYT ? (
+                          /* YouTube controls — YouTube has its own player UI */
+                          <>
+                            <span className="text-sm text-gray-500">
+                              YouTube video — use the player controls above
+                            </span>
+
+                            {/* Completed badge */}
+                            {(markedComplete || isCompleted(lessonId)) ? (
+                              <span className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">
+                                ✓ Completed
+                              </span>
+                            ) : (
+                              <button
+                                onClick={markLessonComplete}
+                                className="text-xs font-semibold bg-yellow-400 hover:bg-yellow-500 px-3 py-1.5 rounded"
+                              >
+                                Mark as Complete
+                              </button>
+                            )}
+
+                            <button onClick={toggleFullscreen} className="ml-auto">
+                              {isFullscreen ? <Minimize /> : <Maximize />}
+                            </button>
+                          </>
+                        ) : (
+                          /* Direct video full controls */
+                          <>
+                            <button onClick={togglePlay}>
+                              {playing ? <Pause /> : <Play />}
+                            </button>
+
+                            <button onClick={toggleMute}>
+                              {isMuted ? <VolumeX /> : <Volume2 />}
+                            </button>
+
+                            <input
+                              type="range"
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              value={isMuted ? 0 : volume}
+                              onChange={handleVolumeChange}
+                              className="w-20 accent-yellow-400"
+                            />
+
+                            <span className="text-sm">
+                              {formatTime(currentTime)} / {formatTime(duration)}
+                            </span>
+
+                            <div
+                              className="flex-1 bg-gray-200 h-1.5 rounded-full cursor-pointer"
+                              onClick={handleProgressClick}
+                            >
+                              <div
+                                className="bg-yellow-400 h-full rounded-full"
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+
+                            {(markedComplete || isCompleted(lessonId)) && (
+                              <span className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">
+                                ✓ Completed
+                              </span>
+                            )}
+
+                            <div className="relative">
+                              <button onClick={() => setShowSpeedMenu(!showSpeedMenu)}>
+                                <Settings />
+                              </button>
+
+                              {showSpeedMenu && (
+                                <div className="absolute bottom-full right-0 bg-white border rounded shadow p-2 z-10">
+                                  <p className="text-xs text-gray-400 mb-1 px-1">Speed</p>
+                                  {speedOptions.map((speed) => (
+                                    <button
+                                      key={speed}
+                                      onClick={() => handleSpeedChange(speed)}
+                                      className={`block text-sm py-1 px-2 w-full text-left rounded hover:bg-gray-100 ${
+                                        playbackSpeed === speed ? "font-bold text-yellow-500" : ""
+                                      }`}
+                                    >
+                                      {speed}x
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <button onClick={toggleFullscreen}>
+                              {isFullscreen ? <Minimize /> : <Maximize />}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
+
+                  {lesson.description && (
+                    <div className="mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                      <h3 className="text-base font-semibold mb-2">About this lesson</h3>
+                      <p className="text-sm text-gray-600">{lesson.description}</p>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            ) : (
+              /* ================= QUIZ VIEW ================= */
+              <div className="bg-white border rounded-2xl shadow-md p-10 text-center">
+                <FileText className="mx-auto mb-4 w-10 h-10 text-gray-700" />
+                <h2 className="text-xl font-semibold mb-4">{lesson.title}</h2>
+
+                <Link
+                  to={`/student-course/${course._id}/${module._id}/${lesson._id}/quiz`}
+                  className="bg-yellow-400 hover:bg-yellow-500 px-6 py-3 rounded-md font-medium"
+                >
+                  Start Quiz
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 

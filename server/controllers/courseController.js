@@ -408,3 +408,156 @@ exports.getAllStudents = async (req, res) => {
     });
   }
 };
+
+exports.enrollCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    // 1️⃣ Check if course exists & is published
+    const course = await Course.findOne({
+      _id: courseId,
+      isPublished: true,
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found or not published",
+      });
+    }
+
+    // 2️⃣ Prevent duplicate enrollment
+    if (course.enrolledStudents.includes(req.user.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Already enrolled in this course",
+      });
+    }
+
+    // 3️⃣ Add student
+    course.enrolledStudents.push(req.user.id);
+
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Enrolled successfully",
+      courseId: course._id,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ============================
+// GET STUDENT ENROLLED COURSES
+// ============================
+// ===============================
+// GET MY ENROLLED COURSES
+// ===============================
+exports.getMyEnrolledCourses = async (req, res) => {
+  try {
+    const courses = await Course.find({
+      enrolledStudents: req.user.id,
+    });
+
+    const formattedCourses = courses.map((course) => ({
+      _id: course._id,
+      title: course.title,
+      duration: course.duration,
+      thumbnail: course.thumbnail,
+      modules: course.modules.map((module) => {
+        const totalLessons = module.lessons.length;
+        const completedLessons = 0; // you can improve later
+
+        const progress =
+          totalLessons === 0
+            ? 0
+            : Math.floor((completedLessons / totalLessons) * 100);
+
+        return {
+          _id: module._id,
+          title: module.title,
+          progress,
+          lessons: module.lessons,
+        };
+      }),
+    }));
+
+    res.status(200).json({
+      success: true,
+      courses: formattedCourses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ===================================
+// GET COURSE FOR STUDENT (ENROLLED)
+// ===================================
+// exports.getStudentCourse = async (req, res) => {
+//   try {
+//     const { courseId } = req.params;
+
+//     const course = await Course.findOne({
+//       _id: courseId,
+//       enrolledStudents: req.user.id, // ✅ only enrolled students
+//     });
+
+//     if (!course) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Course not found",
+//       });
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       course,
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+exports.getStudentCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await Course.findOne({
+      _id: courseId,
+      enrolledStudents: req.user.id, // ✅ IMPORTANT
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      course,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+

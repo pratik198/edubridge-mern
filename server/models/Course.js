@@ -1,6 +1,10 @@
 
 const mongoose = require("mongoose");
 
+
+// ============================
+// LESSON SCHEMA
+// ============================
 const lessonSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -8,9 +12,13 @@ const lessonSchema = new mongoose.Schema({
   },
   description: String,
   duration: String,
-  videoUrl: String,
+  videoUrl: String, // YouTube or any video link
 });
 
+
+// ============================
+// QUIZ SCHEMA
+// ============================
 const quizSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -22,6 +30,10 @@ const quizSchema = new mongoose.Schema({
   },
 });
 
+
+// ============================
+// MODULE SCHEMA
+// ============================
 const moduleSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -32,31 +44,47 @@ const moduleSchema = new mongoose.Schema({
     default: [],
   },
   quizzes: {
-    type: [quizSchema],   // 🔥 THIS WAS MISSING
+    type: [quizSchema],
     default: [],
   },
 });
 
+
+// ============================
+// COURSE SCHEMA
+// ============================
 const courseSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
     },
+
     shortDescription: String,
     category: String,
     level: String,
     duration: String,
     thumbnail: String,
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     modules: {
       type: [moduleSchema],
       default: [],
     },
+
+    // ✅ NEW: Enrolled Students
+    enrolledStudents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
     isPublished: {
       type: Boolean,
       default: false,
@@ -64,5 +92,8 @@ const courseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+
 
 module.exports = mongoose.model("Course", courseSchema);
