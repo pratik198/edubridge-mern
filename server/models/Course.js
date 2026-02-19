@@ -5,6 +5,22 @@ const mongoose = require("mongoose");
 // ============================
 // LESSON SCHEMA
 // ============================
+// const lessonSchema = new mongoose.Schema({
+//   title: {
+//     type: String,
+//     required: true,
+//   },
+//   description: String,
+//   duration: String,
+//   videoUrl: String,
+//    completedBy: [
+//       {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: "User",
+//       },
+//     ], // YouTube or any video link
+// });
+
 const lessonSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -13,13 +29,30 @@ const lessonSchema = new mongoose.Schema({
   description: String,
   duration: String,
   videoUrl: String,
-   completedBy: [
-      {
+
+  // 🔥 NEW: track progress per user
+  progressBy: [
+    {
+      userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-    ], // YouTube or any video link
+      percent: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
+
+  // Optional: keep this if you want
+  completedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
+
 
 
 // ============================

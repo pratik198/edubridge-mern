@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
 import Footer from "../../../components/studentcomponents/Footer";
+import FeedbackStudent from "../FeedbackStudent";
 import {
   FileText,
   Settings,
@@ -59,10 +60,135 @@ const LessonPlayer = () => {
     fetchCourse();
   }, [courseId]);
 
+// useEffect(() => {
+//   if (!course) return;
+//   if (!playerRef.current) return;
+
+//   if (plyrInstance.current) {
+//     plyrInstance.current.destroy();
+//   }
+
+//   const player = new Plyr(playerRef.current, {
+//     controls: [
+//       "play",
+//       "progress",
+//       "current-time",
+//       "duration",
+//       "mute",
+//       "volume",
+//       "settings",
+//       "fullscreen",
+//     ],
+//     youtube: {
+//       noCookie: true,
+//       rel: 0,
+//     },
+//   });
+
+//   plyrInstance.current = player;
+
+//   let interval = null;
+
+//   // Resume from localStorage
+//   const savedTime = localStorage.getItem(`progress-${lessonId}`);
+//   player.on("ready", () => {
+//     if (savedTime) {
+//       player.currentTime = parseFloat(savedTime);
+//     }
+//   });
+
+//   // START tracking
+//   player.on("play", () => {
+//     if (interval) return; // 🚀 prevent multiple intervals
+
+//     interval = setInterval(() => {
+//       const current = player.currentTime;
+//       const duration = player.duration;
+
+//       if (!duration) return;
+
+//       const percent = Math.floor((current / duration) * 100);
+
+//       setProgress(percent);
+
+//       // Save locally
+//       localStorage.setItem(`progress-${lessonId}`, current);
+
+//       // Send to backend
+//       // fetch(
+//       //   `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+//       //   {
+//       //     method: "PUT",
+//       //     headers: {
+//       //       "Content-Type": "application/json",
+//       //       Authorization: `Bearer ${token}`,
+//       //     },
+//       //     body: JSON.stringify({ progress: percent }),
+//       //   }
+//       // );
+
+//       fetch(
+//   `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+//   {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify({ progress: percent }),
+//   }
+// )
+//   .then(res => res.json())
+//   .then(data => {
+//     if (data.success) {
+//       console.log("Progress Updated:", data);
+
+//       // Example: store in localStorage
+//       localStorage.setItem(
+//         `progress-${data.courseId}-${data.moduleId}-${data.lessonId}`,
+//         data.progress
+//       );
+
+//       if (data.completed) {
+//         setMarkedComplete(true);
+//       }
+//     }
+//   });
+
+//       if (percent >= 90) {
+//         setMarkedComplete(true);
+//       }
+
+//     }, 10000);
+//   });
+
+//   // STOP tracking
+//   const stopInterval = () => {
+//     if (interval) {
+//       clearInterval(interval);
+//       interval = null;
+//     }
+//   };
+
+//   player.on("pause", stopInterval);
+//   player.on("ended", () => {
+//     stopInterval();
+//     setMarkedComplete(true);
+//   });
+
+//   return () => {
+//     stopInterval();
+//     player.destroy();
+//   };
+
+// }, [course, lessonId]);
+
+
 useEffect(() => {
   if (!course) return;
   if (!playerRef.current) return;
 
+  // Destroy old player if exists
   if (plyrInstance.current) {
     plyrInstance.current.destroy();
   }
@@ -96,9 +222,9 @@ useEffect(() => {
     }
   });
 
-  // START tracking
+  // ================= START TRACKING =================
   player.on("play", () => {
-    if (interval) return; // 🚀 prevent multiple intervals
+    if (interval) return; // prevent multiple intervals
 
     interval = setInterval(() => {
       const current = player.currentTime;
@@ -106,62 +232,42 @@ useEffect(() => {
 
       if (!duration) return;
 
-      const percent = Math.floor((current / duration) * 100);
+      let percent = Math.floor((current / duration) * 100);
+
+      // 🔥 Force 100 when >=95
+      if (percent >= 95) {
+        percent = 100;
+      }
 
       setProgress(percent);
 
       // Save locally
       localStorage.setItem(`progress-${lessonId}`, current);
 
-      // Send to backend
-      // fetch(
-      //   `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
-      //   {
-      //     method: "PUT",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //     body: JSON.stringify({ progress: percent }),
-      //   }
-      // );
-
+      // Send to backend every 2 seconds
       fetch(
-  `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
-  {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ progress: percent }),
-  }
-)
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      console.log("Progress Updated:", data);
+        `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ progress: percent }),
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.completed) {
+            setMarkedComplete(true);
+          }
+        })
+        .catch((err) => console.error("Progress error:", err));
 
-      // Example: store in localStorage
-      localStorage.setItem(
-        `progress-${data.courseId}-${data.moduleId}-${data.lessonId}`,
-        data.progress
-      );
-
-      if (data.completed) {
-        setMarkedComplete(true);
-      }
-    }
+    }, 2000); // ✅ every 2 seconds
   });
 
-      if (percent >= 90) {
-        setMarkedComplete(true);
-      }
-
-    }, 10000);
-  });
-
-  // STOP tracking
+  // ================= STOP TRACKING =================
   const stopInterval = () => {
     if (interval) {
       clearInterval(interval);
@@ -172,7 +278,21 @@ useEffect(() => {
   player.on("pause", stopInterval);
   player.on("ended", () => {
     stopInterval();
+    setProgress(100);
     setMarkedComplete(true);
+
+    // Final force update to DB
+    fetch(
+      `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ progress: 100 }),
+      }
+    );
   });
 
   return () => {
@@ -181,7 +301,6 @@ useEffect(() => {
   };
 
 }, [course, lessonId]);
-
 
 
   if (!course) return <div className="pt-24 px-10">Loading...</div>;
@@ -353,6 +472,11 @@ useEffect(() => {
                       </p>
                     </div>
                   )}
+
+                  <div>
+                    <FeedbackStudent/>
+                  </div>
+
                 </div>
               </div>
             ) : (
