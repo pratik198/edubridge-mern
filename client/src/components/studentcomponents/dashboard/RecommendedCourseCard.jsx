@@ -6,7 +6,7 @@ const RecommendedCourseCard = ({ course }) => {
   if (!course) return null;
 
   const handleNavigate = () => {
-    navigate(`/course-details/${course._id}`);
+    navigate(`/CourseDetailsForStudent/${course._id}`);
   };
 
   return (

@@ -1,5 +1,6 @@
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import { useNavigate } from "react-router-dom";
 
 const stats = [
   { title: "Courses Completed", value: "2", change: "5% increase" },
@@ -9,6 +10,7 @@ const stats = [
 ];
 
 const DashHero = () => {
+  const navigate = useNavigate();
   const progress = 60; // 🔥 Just change this dynamically later
 
   return (
@@ -23,7 +25,10 @@ const DashHero = () => {
             You’ve completed 3 out of 5 courses this month. Keep it up!
           </p>
 
-          <button className="mt-6 bg-yellow-400 hover:bg-yellow-500 transition px-6 py-3 rounded-lg font-semibold text-sm">
+          <button
+            onClick={() => navigate("/s-enrolled-courses")}
+            className="mt-6 bg-yellow-400 hover:bg-yellow-500 transition px-6 py-3 rounded-lg font-semibold text-sm"
+          >
             Continue Last Course
           </button>
         </div>

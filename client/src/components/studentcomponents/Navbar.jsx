@@ -143,7 +143,7 @@
 // }
 
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import assets from "../../assets/assets";
 import {
   FiBell,
@@ -157,6 +157,14 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const menuRef = useRef(null);
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentCourseId");
+    navigate("/");
+  };
 
   // close profile dropdown on outside click
   useEffect(() => {
@@ -244,7 +252,7 @@ export default function Navbar() {
             </div>
 
             {open && (
-              <div className="absolute right-0 mt-3 bg-white shadow-2xl rounded-2xl w-48">
+              <div className="absolute z-50 right-0 mt-3 bg-white shadow-2xl rounded-2xl w-48">
                 <ul className="p-2 text-sm">
                   <li>
                     <Link
@@ -262,7 +270,13 @@ export default function Navbar() {
 
                   <hr className="my-1" />
 
-                  <li className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer">
+                  <li
+                    onClick={() => {
+                      handleLogout();
+                      setOpen(false);
+                    }}
+                    className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
+                  >
                     Logout
                   </li>
                 </ul>

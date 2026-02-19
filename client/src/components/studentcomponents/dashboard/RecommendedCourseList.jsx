@@ -66,4 +66,3 @@ const RecommendedCourseList = () => {
 };
 
 export default RecommendedCourseList;
-
