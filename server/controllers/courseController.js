@@ -456,72 +456,68 @@ exports.enrollCourse = async (req, res) => {
 // ============================
 // GET STUDENT ENROLLED COURSES
 // ============================
-// ===============================
-// GET MY ENROLLED COURSES
-// ===============================
-exports.getMyEnrolledCourses = async (req, res) => {
-  try {
-    const courses = await Course.find({
-      enrolledStudents: req.user.id,
-    });
 
-    const formattedCourses = courses.map((course) => ({
-      _id: course._id,
-      title: course.title,
-      duration: course.duration,
-      thumbnail: course.thumbnail,
-      modules: course.modules.map((module) => {
-        const totalLessons = module.lessons.length;
-        const completedLessons = 0; // you can improve later
 
-        const progress =
-          totalLessons === 0
-            ? 0
-            : Math.floor((completedLessons / totalLessons) * 100);
-
-        return {
-          _id: module._id,
-          title: module.title,
-          progress,
-          lessons: module.lessons,
-        };
-      }),
-    }));
-
-    res.status(200).json({
-      success: true,
-      courses: formattedCourses,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// ===================================
-// GET COURSE FOR STUDENT (ENROLLED)
-// ===================================
-// exports.getStudentCourse = async (req, res) => {
+// exports.getMyEnrolledCourses = async (req, res) => {
 //   try {
-//     const { courseId } = req.params;
-
-//     const course = await Course.findOne({
-//       _id: courseId,
-//       enrolledStudents: req.user.id, // ✅ only enrolled students
+//     const courses = await Course.find({
+//       enrolledStudents: req.user.id,
+//       isPublished: true,
 //     });
 
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Course not found",
+//     const formattedCourses = courses.map((course) => {
+
+//       const modules = course.modules.map((module) => {
+
+//         // 🔥 Calculate lesson-level progress using progressBy
+//         const lessonPercents = module.lessons.map((lesson) => {
+//           const userProgress = lesson.progressBy.find(
+//             (p) => p.userId.toString() === req.user.id
+//           );
+
+//           return userProgress ? userProgress.percent : 0;
+//         });
+
+//         // 🔥 Average of lesson percentages
+//         const progress =
+//           lessonPercents.length === 0
+//             ? 0
+//             : Math.floor(
+//                 lessonPercents.reduce((sum, percent) => sum + percent, 0) /
+//                   lessonPercents.length
+//               );
+
+//         return {
+//           _id: module._id,
+//           title: module.title,
+//           progress,
+//           lessons: module.lessons.map(lesson => ({ _id: lesson._id }))
+//         };
 //       });
-//     }
+
+//       // 🔥 Course level progress (average of modules)
+//       const modulePercents = modules.map((m) => m.progress);
+
+//       const courseProgress =
+//         modulePercents.length === 0
+//           ? 0
+//           : Math.floor(
+//               modulePercents.reduce((sum, percent) => sum + percent, 0) /
+//                 modulePercents.length
+//             );
+
+//       return {
+//         _id: course._id,
+//         title: course.title,
+//         duration: course.duration,
+//         progress: courseProgress,
+//         modules,
+//       };
+//     });
 
 //     res.status(200).json({
 //       success: true,
-//       course,
+//       courses: formattedCourses,
 //     });
 
 //   } catch (error) {
@@ -531,6 +527,81 @@ exports.getMyEnrolledCourses = async (req, res) => {
 //     });
 //   }
 // };
+
+
+exports.getMyEnrolledCourses = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const courses = await Course.find({
+      enrolledStudents: userId,
+      isPublished: true,
+    });
+
+    const formattedCourses = courses.map((course) => {
+
+      const modules = course.modules.map((module) => {
+
+        const lessonPercents = module.lessons.map((lesson) => {
+          const userProgress = lesson.progressBy.find(
+            (p) => p.userId.toString() === userId
+          );
+          return userProgress ? userProgress.percent : 0;
+        });
+
+        const moduleProgress =
+          lessonPercents.length === 0
+            ? 0
+            : Math.floor(
+                lessonPercents.reduce((a, b) => a + b, 0) /
+                  lessonPercents.length
+              );
+
+        return {
+          _id: module._id,
+          title: module.title,
+          progress: moduleProgress,
+          lessons: module.lessons.map((lesson) => ({
+            _id: lesson._id,
+          })),
+        };
+      });
+
+      // 🔥 Course level progress
+      const modulePercents = modules.map((m) => m.progress);
+
+      const courseProgress =
+        modulePercents.length === 0
+          ? 0
+          : Math.floor(
+              modulePercents.reduce((a, b) => a + b, 0) /
+                modulePercents.length
+            );
+
+      return {
+        _id: course._id,
+        title: course.title,
+        duration: course.duration,
+        progress: courseProgress,
+        modules,
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      courses: formattedCourses,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
 
 exports.getStudentCourse = async (req, res) => {
   try {

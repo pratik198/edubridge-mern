@@ -116,130 +116,11 @@ exports.getSinglePublishedCourse = async (req, res) => {
 /* ======================================================
    3️⃣ UPDATE LESSON PROGRESS (LIVE TRACKING SUPPORT)
 ====================================================== */
-// exports.updateLessonProgress = async (req, res) => {
-//   try {
-//     const { courseId, moduleId, lessonId } = req.params;
-//     const { progress } = req.body; // percentage from frontend
-
-//     const course = await Course.findOne({
-//       _id: courseId,
-//       enrolledStudents: req.user.id,
-//     });
-
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Course not found or not enrolled",
-//       });
-//     }
-
-//     const module = course.modules.id(moduleId);
-//     if (!module) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Module not found",
-//       });
-//     }
-
-//     const lesson = module.lessons.id(lessonId);
-//     if (!lesson) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Lesson not found",
-//       });
-//     }
-
-//     // ✅ If watched 90%+ → mark completed
-//     if (progress >= 90) {
-//       const alreadyCompleted = lesson.completedBy.some(
-//         (userId) => userId.toString() === req.user.id
-//       );
-
-//       if (!alreadyCompleted) {
-//         lesson.completedBy.push(req.user.id);
-//       }
-//     }
-
-//     await course.save();
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Progress updated successfully",
-//     });
-
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 
 
-// exports.updateLessonProgress = async (req, res) => {
-//   try {
-//     const { courseId, moduleId, lessonId } = req.params;
-//     const { progress } = req.body;
 
-//     const course = await Course.findOne({
-//       _id: courseId,
-//       enrolledStudents: req.user.id,
-//     });
 
-//     if (!course) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Course not found or not enrolled",
-//       });
-//     }
-
-//     const module = course.modules.id(moduleId);
-//     if (!module) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Module not found",
-//       });
-//     }
-
-//     const lesson = module.lessons.id(lessonId);
-//     if (!lesson) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Lesson not found",
-//       });
-//     }
-
-//     let isCompletedNow = false;
-
-//     // ✅ Mark complete if 90%+
-//     if (progress >= 90) {
-//       const alreadyCompleted = lesson.completedBy.some(
-//         (userId) => userId.toString() === req.user.id
-//       );
-
-//       if (!alreadyCompleted) {
-//         lesson.completedBy.push(req.user.id);
-//         isCompletedNow = true;
-//       }
-//     }
-
-//     await course.save();
-
-//     return res.status(200).json({
-//       success: true,
-//       progress,                  // 🔥 return percent
-//       completed: progress >= 90, // 🔥 return completion status
-//       message: "Progress updated successfully",
-//     });
-
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 
 exports.updateLessonProgress = async (req, res) => {
@@ -275,10 +156,22 @@ exports.updateLessonProgress = async (req, res) => {
       });
     }
 
-    let completed = false;
+    // ================= UPDATE progressBy =================
+    const existingProgress = lesson.progressBy.find(
+      (p) => p.userId.toString() === req.user.id
+    );
 
-    // ✅ mark completed if 90%+
-    if (progress >= 90) {
+    if (existingProgress) {
+      existingProgress.percent = progress >= 95 ? 100 : progress;
+    } else {
+      lesson.progressBy.push({
+        userId: req.user.id,
+        percent: progress >= 95 ? 100 : progress,
+      });
+    }
+
+    // ================= MARK COMPLETED =================
+    if (progress >= 95) {
       const alreadyCompleted = lesson.completedBy.some(
         (userId) => userId.toString() === req.user.id
       );
@@ -286,31 +179,24 @@ exports.updateLessonProgress = async (req, res) => {
       if (!alreadyCompleted) {
         lesson.completedBy.push(req.user.id);
       }
-
-      completed = true;
     }
 
     await course.save();
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-
-      // 🔥 RETURN IDENTIFIERS
+      progress: progress >= 95 ? 100 : progress,
       courseId,
       moduleId,
       lessonId,
-
-      // 🔥 RETURN STATE
-      progress,
-      completed,
-
-      message: "Progress updated successfully",
+      completed: progress >= 95,
     });
 
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
+
