@@ -12,7 +12,13 @@ const lessonSchema = new mongoose.Schema({
   },
   description: String,
   duration: String,
-  videoUrl: String, // YouTube or any video link
+  videoUrl: String,
+   completedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ], // YouTube or any video link
 });
 
 

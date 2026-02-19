@@ -19,7 +19,7 @@ const CourseCompletionCard = ({ course }) => {
     >
       {/* Image */}
       <img
-        src={course.image}
+        src={course.thumbnail}
         alt={course.title}
         className="
           w-full 
