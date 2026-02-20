@@ -25,6 +25,7 @@ import StudentProfile from "./screens/teacher/StudentProfile";
 import CourseDetailsForTeacher from "./screens/teacher/CourseDetailsForTeacher";
 import TeacherProfile from "./screens/teacher/TeacherProfile";
 import CourseDetailsForStudent from "./screens/dashboard/CourseDetailsForStudent";
+import CertificateView from "./components/studentcomponents/CertificateView";
 const App = () => {
   return (
     <Routes>
@@ -89,6 +90,8 @@ const App = () => {
       />
       <Route path="/CourseDetailsForStudent/:courseId" element={<CourseDetailsForStudent />} />
       <Route path="/teacher-profile" element={<TeacherProfile />} />
+      <Route path="/certificate/:courseId" element={<CertificateView />} />
+      
     </Routes>
   );
 };
