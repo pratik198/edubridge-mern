@@ -1,153 +1,222 @@
-import { useState } from "react";
-import Navbar from "../../../components/studentcomponents/Navbar";
+import { useEffect, useState } from "react";
+
 import Footer from "../../../components/studentcomponents/Footer";
+import { FiEdit2 } from "react-icons/fi";
+import Navbar from "../../../components/studentcomponents/Navbar";
 
 const StudentInfo = () => {
-  // Dummy initial data (replace with API later)
-  const [formData, setFormData] = useState({
-    fullName: "John Cena",
-    email: "johncena@gmail.com",
-    role: "student",
-    purpose: ["Career Growth"],
-    interests: ["UI/UX Design", "Frontend"],
-    currentRole: "Student",
-    educationLevel: "Undergraduate",
-  });
+  const token = localStorage.getItem("token");
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const [profile, setProfile] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [about, setAbout] = useState("");
+  const [isEditingAbout, setIsEditingAbout] = useState(false);
+
+  /* ================= FETCH PROFILE ================= */
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/profile/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setProfile(data.user);
+        setAbout(data.user.about || "");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleArrayChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value.split(",").map((item) => item.trim()),
-    });
+  /* ================= FETCH ENROLLED COURSES ================= */
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/api/courses/my-enrolled-courses",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        setCourses(data.courses);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Updated Data:", formData);
+  /* ================= SAVE PROFILE ================= */
+  const handleSave = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/profile/update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ about }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setProfile(data.user);
+        setIsEditingAbout(false);
+        alert("Profile updated successfully");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    if (!token) return;
+
+    Promise.all([fetchProfile(), fetchCourses()]).finally(() =>
+      setLoading(false),
+    );
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading profile...
+      </div>
+    );
+  }
+
+  /* ================= CALCULATED STATS ================= */
+  const totalEnrolled = courses.length;
+
+  const completedCourses = courses.filter((c) => c.progress === 100).length;
+
+  const inProgress = courses.filter(
+    (c) => c.progress > 0 && c.progress < 100,
+  ).length;
+
+  const notStarted = courses.filter((c) => c.progress === 0).length;
 
   return (
-    <>
-      <div className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
-        <Navbar />
-      </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
 
-      <div className="bg-white min-h-screen pt-24 flex flex-col">
-        <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
-          {/* LEFT SIDE (Avatar Section) */}
-          <div className="hidden md:block w-64">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-                No Avatar
-              </div>
+      <main className="flex-1 px-6 md:px-12 py-10 space-y-8">
+        {/* ================= PROFILE HEADER ================= */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6 flex items-center gap-5">
+          <img
+            src="https://i.pravatar.cc/150"
+            alt="profile"
+            className="w-20 h-20 rounded-full object-cover"
+          />
 
-              <h3 className="mt-4 font-semibold text-gray-900">
-                {formData.fullName}
-              </h3>
-
-              <p className="text-sm text-gray-500">{formData.email}</p>
-
-              <p className="text-xs text-gray-400 mt-1 capitalize">
-                {formData.role}
-              </p>
-            </div>
-          </div>
-
-          {/* RIGHT SIDE */}
-          <div className="flex-1">
-            <h1 className="text-2xl font-semibold mb-8">Profile Settings</h1>
-
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Basic Info */}
-              <div>
-                <h2 className="font-medium mb-4">Account Information</h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="Full Name"
-                    className="border border-gray-300 rounded-md px-4 py-2"
-                  />
-
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Email"
-                    className="border border-gray-300 rounded-md px-4 py-2"
-                  />
-                </div>
-              </div>
-
-              {/* Onboarding Info */}
-              <div>
-                <h2 className="font-medium mb-4">Learning Preferences</h2>
-
-                <div className="space-y-6">
-                  <input
-                    type="text"
-                    value={formData.purpose.join(", ")}
-                    onChange={(e) =>
-                      handleArrayChange("purpose", e.target.value)
-                    }
-                    placeholder="Purpose (comma separated)"
-                    className="w-full border border-gray-300 rounded-md px-4 py-2"
-                  />
-
-                  <input
-                    type="text"
-                    value={formData.interests.join(", ")}
-                    onChange={(e) =>
-                      handleArrayChange("interests", e.target.value)
-                    }
-                    placeholder="Interests (comma separated)"
-                    className="w-full border border-gray-300 rounded-md px-4 py-2"
-                  />
-
-                  <input
-                    type="text"
-                    name="currentRole"
-                    value={formData.currentRole}
-                    onChange={handleChange}
-                    placeholder="Current Role"
-                    className="w-full border border-gray-300 rounded-md px-4 py-2"
-                  />
-
-                  <input
-                    type="text"
-                    name="educationLevel"
-                    value={formData.educationLevel}
-                    onChange={handleChange}
-                    placeholder="Education Level"
-                    className="w-full border border-gray-300 rounded-md px-4 py-2"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md font-medium"
-              >
-                Save Changes
-              </button>
-            </form>
+          <div>
+            <h2 className="text-lg font-semibold">{profile?.fullName}</h2>
+            <p className="text-sm text-gray-500">Student</p>
+            <p className="text-xs text-gray-400">
+              {profile?.location || "Location not set"}
+            </p>
           </div>
         </div>
 
-        <Footer />
-      </div>
-    </>
+        {/* ================= STATS ================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard title="Total Enrolled Courses" value={totalEnrolled} />
+          <StatCard title="Completed Courses" value={completedCourses} />
+          <StatCard title="In Progress" value={inProgress} />
+          <StatCard title="Not Started" value={notStarted} />
+        </div>
+
+        {/* ================= ABOUT ================= */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6 relative">
+          <h3 className="font-semibold mb-3">About Me</h3>
+
+          {!isEditingAbout ? (
+            <p className="text-sm text-gray-600">
+              {about || "No description added yet."}
+            </p>
+          ) : (
+            <textarea
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm"
+              rows={4}
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+            />
+          )}
+
+          <div
+            className="absolute top-6 right-6 bg-yellow-400 p-2 rounded-full cursor-pointer"
+            onClick={() => setIsEditingAbout(!isEditingAbout)}
+          >
+            <FiEdit2 size={14} />
+          </div>
+
+          {isEditingAbout && (
+            <button
+              onClick={handleSave}
+              className="mt-4 bg-yellow-400 hover:bg-yellow-500 px-5 py-2 rounded-lg text-sm font-medium"
+            >
+              Save
+            </button>
+          )}
+        </div>
+
+        {/* ================= ENROLLED COURSES ================= */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
+          <h3 className="font-semibold">Enrolled Courses</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {courses.map((course) => (
+              <div
+                key={course._id}
+                className="border border-gray-200 rounded-xl p-4"
+              >
+                <div className="flex justify-between items-start">
+                  <p className="text-sm font-medium">{course.title}</p>
+
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      course.progress === 100
+                        ? "bg-green-50 text-green-600"
+                        : course.progress > 0
+                          ? "bg-yellow-50 text-yellow-600"
+                          : "bg-red-50 text-red-600"
+                    }`}
+                  >
+                    {course.progress === 100
+                      ? "Completed"
+                      : course.progress > 0
+                        ? "In Progress"
+                        : "Not Started"}
+                  </span>
+                </div>
+
+                <p className="text-xs text-gray-500 mt-3">
+                  {course.progress}% progress
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+const StatCard = ({ title, value }) => {
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-6">
+      <p className="text-xs text-gray-500">{title}</p>
+      <h2 className="text-lg font-semibold mt-2">{value}</h2>
+    </div>
   );
 };
 

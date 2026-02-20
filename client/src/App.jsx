@@ -46,7 +46,7 @@ const App = () => {
         path="/student-course/:courseId/:moduleId/:lessonId"
         element={<CourseDetails />}
       />
-    
+
       <Route
         path="/student-course/:courseId/:moduleId/:lessonId/learn"
         element={<LessonPlayer />}
@@ -87,7 +87,10 @@ const App = () => {
         path="/course-details/:courseId"
         element={<CourseDetailsForTeacher />}
       />
-      <Route path="/CourseDetailsForStudent/:courseId" element={<CourseDetailsForStudent />} />
+      <Route
+        path="/CourseDetailsForStudent/:courseId"
+        element={<CourseDetailsForStudent />}
+      />
       <Route path="/teacher-profile" element={<TeacherProfile />} />
     </Routes>
   );

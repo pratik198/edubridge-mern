@@ -1,4 +1,3 @@
-
 // import { useState, useEffect } from "react";
 // import { Link } from "react-router-dom";
 // import Navbar from "../../../components/studentcomponents/Navbar";
@@ -206,7 +205,6 @@
 
 // export default EnrolledCourses;
 
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../../components/studentcomponents/Navbar";
@@ -227,7 +225,7 @@ const EnrolledCourses = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await res.json();
@@ -250,11 +248,11 @@ const EnrolledCourses = () => {
     const totalModules = course.modules.length;
 
     const completedModules = course.modules.filter(
-      (m) => m.progress === 100
+      (m) => m.progress === 100,
     ).length;
 
     const startedModules = course.modules.filter(
-      (m) => m.progress > 0 && m.progress < 100
+      (m) => m.progress > 0 && m.progress < 100,
     ).length;
 
     if (completedModules === totalModules && totalModules > 0) {
@@ -272,13 +270,13 @@ const EnrolledCourses = () => {
   const filterCounts = {
     All: courses.length,
     "In Progress": courses.filter(
-      (course) => getCourseStatus(course) === "In Progress"
+      (course) => getCourseStatus(course) === "In Progress",
     ).length,
     Completed: courses.filter(
-      (course) => getCourseStatus(course) === "Completed"
+      (course) => getCourseStatus(course) === "Completed",
     ).length,
     "Not Started": courses.filter(
-      (course) => getCourseStatus(course) === "Not Started"
+      (course) => getCourseStatus(course) === "Not Started",
     ).length,
   };
 
@@ -286,15 +284,13 @@ const EnrolledCourses = () => {
   const filteredCourses =
     activeFilter === "All"
       ? courses
-      : courses.filter(
-          (course) => getCourseStatus(course) === activeFilter
-        );
+      : courses.filter((course) => getCourseStatus(course) === activeFilter);
 
   const toggleCourse = (id) => {
     setOpenCourses((prev) =>
       prev.includes(id)
         ? prev.filter((courseId) => courseId !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 
@@ -314,9 +310,7 @@ const EnrolledCourses = () => {
 
       <div className="bg-white min-h-screen pt-24 flex flex-col">
         <div className="flex-1 px-8 lg:px-16 py-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-5">
-            My Courses
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-5">My Courses</h1>
 
           {/* SORT */}
           <div className="flex gap-3 mb-5">
@@ -393,15 +387,15 @@ const EnrolledCourses = () => {
                           module.progress === 100
                             ? "View"
                             : module.progress === 0
-                            ? "Start"
-                            : "Resume";
+                              ? "Start"
+                              : "Resume";
 
                         const progressColor =
                           module.progress === 100
                             ? "bg-green-600"
                             : module.progress > 0
-                            ? "bg-yellow-400"
-                            : "bg-red-400";
+                              ? "bg-yellow-400"
+                              : "bg-red-400";
 
                         return (
                           <div
@@ -435,7 +429,7 @@ const EnrolledCourses = () => {
                             </div>
 
                             <Link
-                              to={`/student-course/${course._id}/${module._id}/${module.lessons?.[0]?._id}/learn`}
+                              to={`/student-course/${course._id}/${module._id}/${module.lessons?.[0]?._id}`}
                               className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md text-sm font-medium"
                             >
                               {buttonText}

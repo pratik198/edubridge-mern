@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
@@ -22,7 +21,7 @@ const CourseDetails = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const data = await res.json();
@@ -46,9 +45,7 @@ const CourseDetails = () => {
   if (!course) return <div className="pt-24 px-10">Course not found</div>;
 
   const activeModule = course.modules.find((m) => m._id === moduleId);
-  const activeLesson = activeModule?.lessons.find(
-    (l) => l._id === lessonId
-  );
+  const activeLesson = activeModule?.lessons.find((l) => l._id === lessonId);
 
   if (!activeModule || !activeLesson)
     return <div className="pt-24 px-10">Module or Lesson not found</div>;
@@ -64,13 +61,9 @@ const CourseDetails = () => {
           {/* LEFT SIDEBAR */}
           <div className="hidden md:block w-64">
             <div className="bg-white border border-gray-200 rounded-xl p-6 max-h-[60vh] overflow-y-auto">
-              <h2 className="text-lg font-semibold mb-6">
-                {course.title}
-              </h2>
+              <h2 className="text-lg font-semibold mb-6">{course.title}</h2>
 
-              <p className="text-sm text-gray-500 mb-4">
-                Courses Material
-              </p>
+              <p className="text-sm text-gray-500 mb-4">Courses Material</p>
 
               <div className="space-y-3">
                 {course.modules.map((module) => (
@@ -93,43 +86,50 @@ const CourseDetails = () => {
           {/* RIGHT SIDE */}
           <div className="flex-1">
             <div className="mb-8">
-              <h1 className="text-xl font-semibold">
-                {activeModule.title}
-              </h1>
+              <h1 className="text-xl font-semibold">{activeModule.title}</h1>
             </div>
 
             <div className="space-y-4">
-              {activeModule.lessons.map((lesson) => (
+              {[
+                ...(activeModule.lessons || []).map((lesson) => ({
+                  ...lesson,
+                  type: "video",
+                })),
+                ...(activeModule.quizzes || []).map((quiz) => ({
+                  ...quiz,
+                  type: "quiz",
+                })),
+              ].map((item) => (
                 <div
-                  key={lesson._id}
+                  key={item._id}
                   className="flex justify-between items-center bg-white border border-gray-200 rounded-xl px-6 py-4"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-8 h-8 flex items-center justify-center border rounded-md text-sm">
-                      ▶
+                      {item.type === "quiz" ? "❓" : "▶"}
                     </div>
 
                     <div>
-                      <p className="font-medium text-gray-900">
-                        {lesson.title}
-                      </p>
+                      <p className="font-medium text-gray-900">{item.title}</p>
                       <p className="text-sm text-gray-500">
-                        Video • {lesson.duration}
+                        {item.type === "quiz"
+                          ? "Quiz"
+                          : `Video • ${item.duration}`}
                       </p>
                     </div>
                   </div>
 
                   {/* <Link
-                    to={`/student-course/${course._id}/${activeModule._id}/${lesson._id}`}
+                    to={`/student-course/${course._id}/${activeModule._id}/${item._id}`}
                     className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md text-sm font-medium"
                   >
                     Open
                   </Link> */}
                   <Link
                     to={
-                      lesson.type === "quiz"
-                        ? `/student-course/${course._id}/${activeModule._id}/${lesson._id}/quiz`
-                        : `/student-course/${course._id}/${activeModule._id}/${lesson._id}/learn`
+                      item.type === "quiz"
+                        ? `/student-course/${course._id}/${activeModule._id}/${item._id}/quiz`
+                        : `/student-course/${course._id}/${activeModule._id}/${item._id}/learn`
                     }
                     className="
                       bg-yellow-400 hover:bg-yellow-500

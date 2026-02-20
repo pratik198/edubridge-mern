@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
@@ -20,7 +19,7 @@ const QuizPage = () => {
           `http://localhost:5000/api/courses/student/${courseId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const data = await res.json();
@@ -46,7 +45,7 @@ const QuizPage = () => {
           `http://localhost:5000/api/courses/${courseId}/${moduleId}/${lessonId}/quiz-score`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const data = await res.json();
@@ -139,10 +138,9 @@ const QuizPage = () => {
 
       <div className="bg-white min-h-screen pt-24 flex flex-col">
         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
-
           {/* ================= SIDEBAR ================= */}
           <div className="hidden md:block w-72">
-            <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">
                 {course.title}
               </h2>
@@ -232,7 +230,7 @@ const QuizPage = () => {
             </div>
 
             {/* QUIZ INFO CARD */}
-            <div className="bg-white border border-yellow-400 rounded-xl p-6 flex justify-between items-center">
+            <div className="bg-white border border-yellow-400 rounded-2xl shadow-sm p-6 flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-semibold">{lesson.title}</h2>
                 <p className="text-sm text-gray-500 mt-2">
@@ -252,13 +250,12 @@ const QuizPage = () => {
             </div>
 
             {/* GRADE CARD */}
-            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-xl p-6">
+            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm p-6">
               <h3 className="font-medium">Your grade</h3>
 
               {quizScore !== null ? (
                 <p className="text-sm text-gray-700 mt-2">
-                  You scored{" "}
-                  <span className="font-semibold">{quizScore}</span>{" "}
+                  You scored <span className="font-semibold">{quizScore}</span>{" "}
                   {totalQuestions > 0 ? `out of ${totalQuestions}` : ""}
                 </p>
               ) : (
