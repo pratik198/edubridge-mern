@@ -1,4 +1,9 @@
+
+import { useNavigate } from "react-router-dom";
+
 const CourseCompletionCard = ({ course }) => {
+  const navigate = useNavigate();
+
   if (!course) return null;
 
   return (
@@ -19,7 +24,7 @@ const CourseCompletionCard = ({ course }) => {
     >
       {/* Image */}
       <img
-        src={course.image}
+        src={course.thumbnail}
         alt={course.title}
         className="
           w-full 
@@ -35,10 +40,13 @@ const CourseCompletionCard = ({ course }) => {
           {course.title}
         </h3>
 
-        <p className="text-sm text-gray-500 mt-1">{course.instructor}</p>
+        <p className="text-sm text-gray-500 mt-1">
+          {course.instructor}
+        </p>
 
         {/* Button */}
         <button
+          onClick={() => navigate(`/certificate/${course._id}`)}
           className="
             mt-4
             w-full

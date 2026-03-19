@@ -1,67 +1,48 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CourseCard from "./CourseCard";
 
-const dummyCourses = [
-  {
-    image: "https://picsum.photos/seed/a/400/300",
-    author: "Amina Yusuf",
-    title: "UI/UX Design Fundamentals",
-    rating: "4.8",
-    duration: "5h 30m",
-    level: "Beginner"
-  },
-  {
-    image: "https://picsum.photos/seed/b/400/300",
-    author: "Sarah Thompson",
-    title: "Build AI Chatbots with Python",
-    rating: "4.6",
-    duration: "8h 10m",
-    level: "Intermediate"
-  },
-  {
-    image: "https://picsum.photos/seed/c/400/300",
-    author: "Daniel Assefa",
-    title: "Data Science Masterclass",
-    rating: "4.9",
-    duration: "10h 20m",
-    level: "Intermediate"
-  },
-  {
-    image: "https://picsum.photos/seed/d/400/300",
-    author: "Leila Habte",
-    title: "Responsive Web Design",
-    rating: "4.7",
-    duration: "3h 45m",
-    level: "Beginner"
-  },
-  {
-    image: "https://picsum.photos/seed/e/400/300",
-    author: "Marcus Lee",
-    title: "Mobile App UI Design",
-    rating: "4.8",
-    duration: "6h 20m",
-    level: "Beginner"
-  },
-  {
-    image: "https://picsum.photos/seed/f/400/300",
-    author: "Emily Carter",
-    title: "Full-Stack Web Dev",
-    rating: "4.7",
-    duration: "12h 30m",
-    level: "Advanced"
-  }
-];
-
-export default function CourseGrid({ courses = dummyCourses }) {
+export default function CourseGrid() {
 
   const INITIAL_COUNT = 4;
   const [visible, setVisible] = useState(INITIAL_COUNT);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const showMore = () => setVisible(v => v + 4);
+  /* ================= FETCH COURSES ================= */
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/api/student/courses"
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        setCourses(data.courses);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const showMore = () => setVisible((v) => v + 4);
   const showLess = () => setVisible(INITIAL_COUNT);
 
   const allVisible = visible >= courses.length;
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 mt-8">
+        Loading courses...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -70,7 +51,7 @@ export default function CourseGrid({ courses = dummyCourses }) {
 
         {courses.slice(0, visible).map((item, i) => (
           <div
-            key={`${item.title}-${i}`}   // UNIQUE KEY!
+            key={`${item._id}-${i}`}
             style={{ animationDelay: `${i * 60}ms` }}
             className="animate-[fadeUp_0.4s_ease-out]"
           >

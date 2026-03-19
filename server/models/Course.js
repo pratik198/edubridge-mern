@@ -1,5 +1,10 @@
-// const mongoose = require("mongoose");
 
+const mongoose = require("mongoose");
+
+
+// ============================
+// LESSON SCHEMA
+// ============================
 // const lessonSchema = new mongoose.Schema({
 //   title: {
 //     type: String,
@@ -7,45 +12,14 @@
 //   },
 //   description: String,
 //   duration: String,
-//   videoUrl: String, // YouTube link
+//   videoUrl: String,
+//    completedBy: [
+//       {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: "User",
+//       },
+//     ], // YouTube or any video link
 // });
-
-// const moduleSchema = new mongoose.Schema({
-//   title: {
-//     type: String,
-//     required: true,
-//   },
-//   lessons: [lessonSchema],
-// });
-
-// const courseSchema = new mongoose.Schema(
-//   {
-//     title: {
-//       type: String,
-//       required: true,
-//     },
-//     shortDescription: String,
-//     category: String,
-//     level: String,
-//     duration: String,
-//     thumbnail: String,
-//     createdBy: {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Auth", // or User (use your actual user model name)
-//       required: true,
-//     },
-//     modules: [moduleSchema],
-//     isPublished: {
-//       type: Boolean,
-//       default: false,
-//     },
-//   },
-//   { timestamps: true }
-// );
-
-// module.exports = mongoose.model("Course", courseSchema);
-
-const mongoose = require("mongoose");
 
 const lessonSchema = new mongoose.Schema({
   title: {
@@ -55,8 +29,35 @@ const lessonSchema = new mongoose.Schema({
   description: String,
   duration: String,
   videoUrl: String,
+
+  // 🔥 NEW: track progress per user
+  progressBy: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      percent: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
+
+  // Optional: keep this if you want
+  completedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
+
+
+// ============================
+// QUIZ SCHEMA
+// ============================
 const quizSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -68,6 +69,10 @@ const quizSchema = new mongoose.Schema({
   },
 });
 
+
+// ============================
+// MODULE SCHEMA
+// ============================
 const moduleSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -78,31 +83,47 @@ const moduleSchema = new mongoose.Schema({
     default: [],
   },
   quizzes: {
-    type: [quizSchema],   // 🔥 THIS WAS MISSING
+    type: [quizSchema],
     default: [],
   },
 });
 
+
+// ============================
+// COURSE SCHEMA
+// ============================
 const courseSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
     },
+
     shortDescription: String,
     category: String,
     level: String,
     duration: String,
     thumbnail: String,
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Auth",
+      ref: "User",
       required: true,
     },
+
     modules: {
       type: [moduleSchema],
       default: [],
     },
+
+    // ✅ NEW: Enrolled Students
+    enrolledStudents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
     isPublished: {
       type: Boolean,
       default: false,
@@ -110,5 +131,8 @@ const courseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+
 
 module.exports = mongoose.model("Course", courseSchema);

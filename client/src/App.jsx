@@ -22,7 +22,10 @@ import QuizPage from "./screens/dashboard/quizPage/QuizPage";
 import QuizAttempt from "./screens/dashboard/quizAttempt/QuizAttempt";
 import StudentInfo from "./screens/dashboard/studentInfo/StudentInfo";
 import StudentProfile from "./screens/teacher/StudentProfile";
-
+import CourseDetailsForTeacher from "./screens/teacher/CourseDetailsForTeacher";
+import TeacherProfile from "./screens/teacher/TeacherProfile";
+import CourseDetailsForStudent from "./screens/dashboard/CourseDetailsForStudent";
+import CertificateView from "./components/studentcomponents/CertificateView";
 const App = () => {
   return (
     <Routes>
@@ -44,6 +47,7 @@ const App = () => {
         path="/student-course/:courseId/:moduleId/:lessonId"
         element={<CourseDetails />}
       />
+    
       <Route
         path="/student-course/:courseId/:moduleId/:lessonId/learn"
         element={<LessonPlayer />}
@@ -75,6 +79,19 @@ const App = () => {
       />
       <Route path="/teacher/students" element={<Students />} />
       <Route path="/teacher/students/:id" element={<StudentProfile />} />
+      <Route path="/teacher/course/:courseId" element={<CourseDetails />} />
+      {/* <Route
+        path="/teacher/course-details/:courseId"
+        element={<CourseDetailsForTeacher />}
+      /> */}
+      <Route
+        path="/course-details/:courseId"
+        element={<CourseDetailsForTeacher />}
+      />
+      <Route path="/CourseDetailsForStudent/:courseId" element={<CourseDetailsForStudent />} />
+      <Route path="/teacher-profile" element={<TeacherProfile />} />
+      <Route path="/certificate/:courseId" element={<CertificateView />} />
+      
     </Routes>
   );
 };

@@ -1,256 +1,330 @@
-import { useParams, Link } from "react-router-dom";
+
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import Navbar from "../../../components/studentcomponents/Navbar";
 import Footer from "../../../components/studentcomponents/Footer";
-import { courses } from "../../../data/courses";
+import FeedbackStudent from "../FeedbackStudent";
 import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Download,
   FileText,
   Settings,
   Maximize,
   Minimize,
 } from "lucide-react";
+import Plyr from "plyr";
+import "plyr/dist/plyr.css";
+
+// ================= YOUTUBE HELPER =================
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/
+  );
+  return match ? match[1] : null;
+};
 
 const LessonPlayer = () => {
   const { courseId, moduleId, lessonId } = useParams();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
-  const course = courses.find((c) => c.id === Number(courseId));
-  const module = course?.modules.find((m) => m.id === Number(moduleId));
-  const lesson = module?.lessons.find((l) => l.id === Number(lessonId));
-
-  const videoRef = useRef(null);
+  const playerRef = useRef(null);
+  const plyrInstance = useRef(null);
   const containerRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
+
+  const [course, setCourse] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [markedComplete, setMarkedComplete] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  if (!course || !module || !lesson)
-    return <div className="pt-24 px-10">Not found</div>;
-
-  // Toggle play/pause
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    playing ? videoRef.current.pause() : videoRef.current.play();
-    setPlaying(!playing);
-  };
-
-  // Handle video time updates
-  const handleTimeUpdate = () => {
-    if (!videoRef.current) return;
-    const current = videoRef.current.currentTime;
-    const dur = videoRef.current.duration;
-    setCurrentTime(current);
-    setDuration(dur);
-    setProgress((current / dur) * 100);
-  };
-
-  // Handle progress bar click
-  const handleProgressClick = (e) => {
-    if (!videoRef.current) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
-    videoRef.current.currentTime = percentage * videoRef.current.duration;
-  };
-
-  // Format time in MM:SS
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  // Toggle mute
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    if (isMuted) {
-      videoRef.current.volume = volume;
-      setIsMuted(false);
-    } else {
-      videoRef.current.volume = 0;
-      setIsMuted(true);
-    }
-  };
-
-  // Change volume
-  const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-    }
-    if (newVolume === 0) {
-      setIsMuted(true);
-    } else {
-      setIsMuted(false);
-    }
-  };
-
-  // Change playback speed
-  const handleSpeedChange = (speed) => {
-    setPlaybackSpeed(speed);
-    if (videoRef.current) {
-      videoRef.current.playbackRate = speed;
-    }
-    setShowSpeedMenu(false);
-  };
-
-  // Toggle fullscreen
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-
-    if (!isFullscreen) {
-      // Enter fullscreen
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if (containerRef.current.webkitRequestFullscreen) {
-        containerRef.current.webkitRequestFullscreen();
-      } else if (containerRef.current.mozRequestFullScreen) {
-        containerRef.current.mozRequestFullScreen();
-      } else if (containerRef.current.msRequestFullscreen) {
-        containerRef.current.msRequestFullscreen();
-      }
-    } else {
-      // Exit fullscreen
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-  };
-
-  // Listen for fullscreen changes
+  // ================= FETCH COURSE =================
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(
-        document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement ||
-          document.msFullscreenElement,
-      );
-    };
+    const fetchCourse = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/courses/student/${courseId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange,
-      );
-      document.removeEventListener(
-        "mozfullscreenchange",
-        handleFullscreenChange,
-      );
-      document.removeEventListener(
-        "MSFullscreenChange",
-        handleFullscreenChange,
-      );
-    };
-  }, []);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (!videoRef.current) return;
-
-      switch (e.key.toLowerCase()) {
-        case " ":
-        case "k":
-          e.preventDefault();
-          togglePlay();
-          break;
-        case "f":
-          e.preventDefault();
-          toggleFullscreen();
-          break;
-        case "m":
-          e.preventDefault();
-          toggleMute();
-          break;
-        case "arrowleft":
-          e.preventDefault();
-          videoRef.current.currentTime = Math.max(
-            0,
-            videoRef.current.currentTime - 5,
-          );
-          break;
-        case "arrowright":
-          e.preventDefault();
-          videoRef.current.currentTime = Math.min(
-            videoRef.current.duration,
-            videoRef.current.currentTime + 5,
-          );
-          break;
-        case "arrowup":
-          e.preventDefault();
-          const newVolumeUp = Math.min(1, volume + 0.1);
-          setVolume(newVolumeUp);
-          videoRef.current.volume = newVolumeUp;
-          setIsMuted(false);
-          break;
-        case "arrowdown":
-          e.preventDefault();
-          const newVolumeDown = Math.max(0, volume - 0.1);
-          setVolume(newVolumeDown);
-          videoRef.current.volume = newVolumeDown;
-          if (newVolumeDown === 0) setIsMuted(true);
-          break;
-        default:
-          break;
+        if (data.success) {
+          setCourse(data.course);
+          setCompletedLessons(data.completedLessons || []);
+        } else {
+          navigate("/s-enrolled-courses");
+        }
+      } catch (err) {
+        console.error(err);
       }
     };
+    fetchCourse();
+  }, [courseId]);
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [playing, volume, isFullscreen]);
+// useEffect(() => {
+//   if (!course) return;
+//   if (!playerRef.current) return;
 
-  // Close speed menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (showSpeedMenu && !e.target.closest(".speed-menu-container")) {
-        setShowSpeedMenu(false);
-      }
-    };
+//   if (plyrInstance.current) {
+//     plyrInstance.current.destroy();
+//   }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showSpeedMenu]);
+//   const player = new Plyr(playerRef.current, {
+//     controls: [
+//       "play",
+//       "progress",
+//       "current-time",
+//       "duration",
+//       "mute",
+//       "volume",
+//       "settings",
+//       "fullscreen",
+//     ],
+//     youtube: {
+//       noCookie: true,
+//       rel: 0,
+//     },
+//   });
 
-  const currentLessonIndex = module.lessons.findIndex(
-    (l) => l.id === lesson.id,
-  );
-  const nextLesson = module.lessons[currentLessonIndex + 1];
+//   plyrInstance.current = player;
 
-  const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+//   let interval = null;
 
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      setPlaying(false);
-      setCurrentTime(0);
-      setProgress(0);
+//   // Resume from localStorage
+//   const savedTime = localStorage.getItem(`progress-${lessonId}`);
+//   player.on("ready", () => {
+//     if (savedTime) {
+//       player.currentTime = parseFloat(savedTime);
+//     }
+//   });
+
+//   // START tracking
+//   player.on("play", () => {
+//     if (interval) return; // 🚀 prevent multiple intervals
+
+//     interval = setInterval(() => {
+//       const current = player.currentTime;
+//       const duration = player.duration;
+
+//       if (!duration) return;
+
+//       const percent = Math.floor((current / duration) * 100);
+
+//       setProgress(percent);
+
+//       // Save locally
+//       localStorage.setItem(`progress-${lessonId}`, current);
+
+//       // Send to backend
+//       // fetch(
+//       //   `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+//       //   {
+//       //     method: "PUT",
+//       //     headers: {
+//       //       "Content-Type": "application/json",
+//       //       Authorization: `Bearer ${token}`,
+//       //     },
+//       //     body: JSON.stringify({ progress: percent }),
+//       //   }
+//       // );
+
+//       fetch(
+//   `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+//   {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify({ progress: percent }),
+//   }
+// )
+//   .then(res => res.json())
+//   .then(data => {
+//     if (data.success) {
+//       console.log("Progress Updated:", data);
+
+//       // Example: store in localStorage
+//       localStorage.setItem(
+//         `progress-${data.courseId}-${data.moduleId}-${data.lessonId}`,
+//         data.progress
+//       );
+
+//       if (data.completed) {
+//         setMarkedComplete(true);
+//       }
+//     }
+//   });
+
+//       if (percent >= 90) {
+//         setMarkedComplete(true);
+//       }
+
+//     }, 10000);
+//   });
+
+//   // STOP tracking
+//   const stopInterval = () => {
+//     if (interval) {
+//       clearInterval(interval);
+//       interval = null;
+//     }
+//   };
+
+//   player.on("pause", stopInterval);
+//   player.on("ended", () => {
+//     stopInterval();
+//     setMarkedComplete(true);
+//   });
+
+//   return () => {
+//     stopInterval();
+//     player.destroy();
+//   };
+
+// }, [course, lessonId]);
+
+
+useEffect(() => {
+  if (!course) return;
+  if (!playerRef.current) return;
+
+  // Destroy old player if exists
+  if (plyrInstance.current) {
+    plyrInstance.current.destroy();
+  }
+
+  const player = new Plyr(playerRef.current, {
+    controls: [
+      "play",
+      "progress",
+      "current-time",
+      "duration",
+      "mute",
+      "volume",
+      "settings",
+      "fullscreen",
+    ],
+    youtube: {
+      noCookie: true,
+      rel: 0,
+    },
+  });
+
+  plyrInstance.current = player;
+
+  let interval = null;
+
+  // Resume from localStorage
+  const savedTime = localStorage.getItem(`progress-${lessonId}`);
+  player.on("ready", () => {
+    if (savedTime) {
+      player.currentTime = parseFloat(savedTime);
     }
-  }, [lessonId]);
+  });
+
+  // ================= START TRACKING =================
+  player.on("play", () => {
+    if (interval) return; // prevent multiple intervals
+
+    interval = setInterval(() => {
+      const current = player.currentTime;
+      const duration = player.duration;
+
+      if (!duration) return;
+
+      let percent = Math.floor((current / duration) * 100);
+
+      // 🔥 Force 100 when >=95
+      if (percent >= 95) {
+        percent = 100;
+      }
+
+      setProgress(percent);
+
+      // Save locally
+      localStorage.setItem(`progress-${lessonId}`, current);
+
+      // Send to backend every 2 seconds
+      fetch(
+        `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ progress: percent }),
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.completed) {
+            setMarkedComplete(true);
+          }
+        })
+        .catch((err) => console.error("Progress error:", err));
+
+    }, 2000); // ✅ every 2 seconds
+  });
+
+  // ================= STOP TRACKING =================
+  const stopInterval = () => {
+    if (interval) {
+      clearInterval(interval);
+      interval = null;
+    }
+  };
+
+  player.on("pause", stopInterval);
+  player.on("ended", () => {
+    stopInterval();
+    setProgress(100);
+    setMarkedComplete(true);
+
+    // Final force update to DB
+    fetch(
+      `http://localhost:5000/api/student/courses/${courseId}/${moduleId}/${lessonId}/progress`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ progress: 100 }),
+      }
+    );
+  });
+
+  return () => {
+    stopInterval();
+    player.destroy();
+  };
+
+}, [course, lessonId]);
+
+
+  if (!course) return <div className="pt-24 px-10">Loading...</div>;
+
+  const module = course.modules.find((m) => m._id === moduleId);
+  if (!module) return <div className="pt-24 px-10">Module not found</div>;
+
+  const combinedLessons = [
+    ...module.lessons.map((l) => ({ ...l, type: "video" })),
+    ...module.quizzes.map((q) => ({ ...q, type: "quiz" })),
+  ];
+
+  const lesson = combinedLessons.find((l) => l._id === lessonId);
+  if (!lesson) return <div className="pt-24 px-10">Lesson not found</div>;
+
+  const ytId = getYouTubeId(lesson.videoUrl);
+
+  const isCompleted = (id) => completedLessons.includes(id);
+
+  const getLessonPath = (l, mId) =>
+  l.type === "quiz"
+    ? `/student-course/${courseId}/${mId}/${l._id}/quiz`
+    : `/student-course/${courseId}/${mId}/${l._id}/learn`;
+
 
   return (
     <>
@@ -260,254 +334,166 @@ const LessonPlayer = () => {
 
       <div className="bg-white min-h-screen pt-24 flex flex-col">
         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
-          {/* SIDEBAR */}
-          {/* SIDEBAR */}
+
+          {/* SIDEBAR (UNCHANGED) */}
           <div className="hidden md:block w-72">
-            <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              {/* Course Title */}
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                {course.title}
-              </h2>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 max-h-[80vh] overflow-y-auto">
+              <h2 className="text-lg font-semibold mb-6">{course.title}</h2>
 
-              {/* Module Info */}
-              <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Module {module.id}</p>
-                <h3 className="text-sm font-medium text-gray-800">
-                  {module.title}
-                </h3>
-              </div>
+              <div className="space-y-6">
+                {course?.modules?.map((mod, modIdx) => {
+                  const modCombined = [
+                    ...(mod.lessons || []).map((l) => ({ ...l, type: "video" })),
+                   ...(mod.quizzes || []).map((q) => ({ ...q, type: "quiz", duration: "Quiz" })),
 
-              {/* Lessons List */}
-              <div className="mt-4 space-y-3">
-                {module.lessons.map((l) => (
-                  <Link
-                    key={l.id}
-                    to={
-                      l.type === "quiz"
-                        ? `/student-course/${course.id}/${module.id}/${l.id}/quiz`
-                        : `/student-course/${course.id}/${module.id}/${l.id}/learn`
-                    }
-                    className={`block rounded-lg p-4 border transition-all ${
-                      l.id === lesson.id
-                        ? "bg-gray-200 border-gray-300"
-                        : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Icon */}
-                      <div className="mt-1">
-                        {l.type === "video" ? (
-                          <div className="w-6 h-6 flex items-center justify-center border border-gray-400 rounded">
-                            ▶
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 flex items-center justify-center border border-gray-400 rounded">
-                            ≡
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Title + Duration */}
-                      <div>
-                        <p
-                          className={`text-sm ${
-                            l.id === lesson.id
-                              ? "font-medium text-gray-900"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {l.title}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {l.duration} min
-                        </p>
+                  ];
+                  return (
+                    <div key={mod._id}>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                        Module {modIdx + 1}: {mod.title}
+                      </p>
+                      <div className="space-y-2">
+                        {modCombined.map((l) => {
+                          const isActive = l._id === lesson._id && mod._id === moduleId;
+                          const done = isCompleted(l._id);
+                          return (
+                            <Link
+                              key={l._id}
+                              to={getLessonPath(l, mod._id)}
+                              className={`block rounded-lg p-4 border transition-all ${
+                                isActive
+                                  ? "bg-gray-200 border-gray-300"
+                                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="mt-1 flex-shrink-0">
+                                  {done ? (
+                                    <div className="w-6 h-6 flex items-center justify-center border rounded bg-green-100 text-green-600 text-xs font-bold">
+                                      ✓
+                                    </div>
+                                  ) : l.type === "video" ? (
+                                    <div className="w-6 h-6 flex items-center justify-center border rounded">
+                                      ▶
+                                    </div>
+                                  ) : (
+                                    <div className="w-6 h-6 flex items-center justify-center border rounded">
+                                      ≡
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">{l.title}</p>
+                                  <p className="text-xs text-gray-500 mt-1">{l.duration}</p>
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-
-              {/* Grades Section */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500">Grades</p>
+                  );
+                })}
               </div>
             </div>
           </div>
 
+
           {/* RIGHT SIDE */}
           <div className="flex-1">
-            <div className="mb-8 border-b border-gray-200 pb-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-                {nextLesson && (
-                  <Link
-                    to={`/student-course/${course.id}/${module.id}/${nextLesson.id}/learn`}
-                    className="text-yellow-500 font-medium"
+
+            {lesson.type === "video" ? (
+              <div className="flex justify-center">
+                <div className="w-full max-w-5xl">
+                  <div
+                    ref={containerRef}
+                    className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
                   >
-                    Next →
-                  </Link>
-                )}
-              </div>
-            </div>
+                    <div className="relative bg-black aspect-video">
 
-            {/* VIDEO */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-5xl">
-                <div
-                  ref={containerRef}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
-                >
-                  {/* Proper 16:9 Ratio */}
-                  <div className="relative bg-black aspect-video">
-                    <video
-                      ref={videoRef}
-                      onTimeUpdate={handleTimeUpdate}
-                      onLoadedMetadata={handleTimeUpdate}
-                      className="w-full h-full object-contain"
-                      onClick={togglePlay}
-                    >
-                      {/* <source
-                        src="https://www.w3schools.com/html/mov_bbb.mp4"
-                        type="video/mp4"
-                      /> */}
-                      {lesson.type === "video" && (
-                        <source src={lesson.videoUrl} type="video/mp4" />
-                      )}
-                    </video>
-
-                    {!playing && (
-                      <button
-                        onClick={togglePlay}
-                        className="absolute inset-0 flex items-center justify-center bg-black/20"
-                      >
-                        <div className="bg-white rounded-full p-6 shadow-xl">
-                          <Play className="w-10 h-10 text-gray-900 fill-gray-900" />
-                        </div>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* CONTROLS */}
-                  <div className="px-6 py-4 border-t border-gray-100 bg-white">
-                    <div className="flex flex-wrap items-center gap-4">
-                      {/* Play/Pause */}
-                      <button
-                        onClick={togglePlay}
-                        className="text-gray-700 hover:text-gray-900 transition-colors"
-                      >
-                        {playing ? (
-                          <Pause className="w-5 h-5" />
-                        ) : (
-                          <Play className="w-5 h-5 fill-gray-700" />
-                        )}
-                      </button>
-
-                      {/* Volume Control */}
-                      <div className="flex items-center gap-2 group">
-                        <button
-                          onClick={toggleMute}
-                          className="text-gray-700 hover:text-gray-900 transition-colors"
-                        >
-                          {isMuted || volume === 0 ? (
-                            <VolumeX className="w-5 h-5" />
-                          ) : (
-                            <Volume2 className="w-5 h-5" />
-                          )}
-                        </button>
-                        <input
-                          type="range"
-                          min="0"
-                          max="1"
-                          step="0.01"
-                          value={isMuted ? 0 : volume}
-                          onChange={handleVolumeChange}
-                          className="w-0 group-hover:w-20 transition-all duration-200 accent-yellow-400"
-                        />
-                      </div>
-
-                      {/* Current Time */}
-                      <span className="text-sm text-gray-600 min-w-[60px]">
-                        {formatTime(currentTime)}
-                      </span>
-
-                      {/* Progress Bar */}
-                      <div
-                        className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden cursor-pointer group"
-                        onClick={handleProgressClick}
-                      >
+                      {ytId ? (
                         <div
-                          className="bg-yellow-400 h-full transition-all relative group-hover:h-2"
-                          style={{ width: `${progress}%` }}
+                          ref={playerRef}
+                          data-plyr-provider="youtube"
+                          data-plyr-embed-id={ytId}
+                        />
+                      ) : (
+                        <video
+                          ref={playerRef}
+                          controls
+                          className="w-full h-full object-contain"
                         >
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                      </div>
+                          <source src={lesson.videoUrl} type="video/mp4" />
+                        </video>
+                      )}
 
-                      {/* Duration */}
-                      <span className="text-sm text-gray-600 min-w-[60px] text-right">
-                        {formatTime(duration)}
-                      </span>
+                    </div>
 
-                      {/* Right Controls */}
-                      <div className="flex items-center gap-3">
-                        <button className="text-gray-700 hover:text-gray-900 transition-colors">
-                          <Download className="w-5 h-5" />
-                        </button>
-                        <button className="text-gray-700 hover:text-gray-900 transition-colors">
-                          <FileText className="w-5 h-5" />
-                        </button>
+                    {/* CONTROLS BAR (UNCHANGED UI AREA) */}
+                    <div className="px-6 py-4 border-t bg-white">
+                      <div className="flex flex-wrap items-center gap-4">
 
-                        {/* Speed Settings */}
-                        <div className="relative speed-menu-container">
-                          <button
-                            onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                            className="text-gray-700 hover:text-gray-900 transition-colors"
-                          >
-                            <Settings className="w-5 h-5" />
-                          </button>
+                        {markedComplete || isCompleted(lessonId) ? (
+                          <span className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">
+                            ✓ Completed
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-500">
+                            {progress}% watched
+                          </span>
+                        )}
 
-                          {showSpeedMenu && (
-                            <div className="absolute bottom-full right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[120px]">
-                              <div className="px-3 py-1 text-xs font-semibold text-gray-500 border-b border-gray-100 mb-1">
-                                Playback Speed
-                              </div>
-                              {speedOptions.map((speed) => (
-                                <button
-                                  key={speed}
-                                  onClick={() => handleSpeedChange(speed)}
-                                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                                    playbackSpeed === speed
-                                      ? "text-yellow-500 font-medium"
-                                      : "text-gray-700"
-                                  }`}
-                                >
-                                  {speed === 1 ? "Normal" : `${speed}x`}
-                                  {playbackSpeed === speed && (
-                                    <span className="float-right">✓</span>
-                                  )}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Fullscreen */}
                         <button
-                          onClick={toggleFullscreen}
-                          className="text-gray-700 hover:text-gray-900 transition-colors"
+                          onClick={() => {
+                            if (!document.fullscreenElement) {
+                              containerRef.current.requestFullscreen();
+                              setIsFullscreen(true);
+                            } else {
+                              document.exitFullscreen();
+                              setIsFullscreen(false);
+                            }
+                          }}
+                          className="ml-auto"
                         >
-                          {isFullscreen ? (
-                            <Minimize className="w-5 h-5" />
-                          ) : (
-                            <Maximize className="w-5 h-5" />
-                          )}
+                          {isFullscreen ? <Minimize /> : <Maximize />}
                         </button>
+
                       </div>
                     </div>
                   </div>
+
+                  {lesson.description && (
+                    <div className="mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                      <h3 className="text-base font-semibold mb-2">
+                        About this lesson
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {lesson.description}
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <FeedbackStudent/>
+                  </div>
+
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-white border rounded-2xl shadow-md p-10 text-center">
+                <FileText className="mx-auto mb-4 w-10 h-10 text-gray-700" />
+                <h2 className="text-xl font-semibold mb-4">
+                  {lesson.title}
+                </h2>
+                <Link
+                  to={`/student-course/${course._id}/${module._id}/${lesson._id}/quiz`}
+                  className="bg-yellow-400 hover:bg-yellow-500 px-6 py-3 rounded-md font-medium"
+                >
+                  Start Quiz
+                </Link>
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -518,203 +504,3 @@ const LessonPlayer = () => {
 };
 
 export default LessonPlayer;
-
-// import { useParams, Link } from "react-router-dom";
-// import { useRef, useState } from "react";
-// import Navbar from "../../../components/studentcomponents/Navbar";
-// import Footer from "../../../components/studentcomponents/Footer";
-// import { courses } from "../../../data/courses";
-// import {
-//   Play,
-//   Pause,
-//   Volume2,
-//   Download,
-//   FileText,
-//   Settings,
-//   Maximize,
-// } from "lucide-react";
-
-// const LessonPlayer = () => {
-//   const { courseId, moduleId, lessonId } = useParams();
-
-//   const course = courses.find((c) => c.id === Number(courseId));
-//   const module = course?.modules.find((m) => m.id === Number(moduleId));
-//   const lesson = module?.lessons.find((l) => l.id === Number(lessonId));
-
-//   const videoRef = useRef(null);
-//   const [playing, setPlaying] = useState(false);
-//   const [progress, setProgress] = useState(0);
-//   const [currentTime, setCurrentTime] = useState(0);
-//   const [duration, setDuration] = useState(0);
-
-//   if (!course || !module || !lesson)
-//     return <div className="pt-24 px-10">Not found</div>;
-
-//   const togglePlay = () => {
-//     if (!videoRef.current) return;
-//     playing ? videoRef.current.pause() : videoRef.current.play();
-//     setPlaying(!playing);
-//   };
-
-//   const handleTimeUpdate = () => {
-//     if (!videoRef.current) return;
-//     const current = videoRef.current.currentTime;
-//     const dur = videoRef.current.duration;
-//     setCurrentTime(current);
-//     setDuration(dur);
-//     setProgress((current / dur) * 100);
-//   };
-
-//   const handleProgressClick = (e) => {
-//     if (!videoRef.current) return;
-//     const rect = e.currentTarget.getBoundingClientRect();
-//     const x = e.clientX - rect.left;
-//     const percentage = x / rect.width;
-//     videoRef.current.currentTime = percentage * videoRef.current.duration;
-//   };
-
-//   const formatTime = (seconds) => {
-//     if (!seconds || isNaN(seconds)) return "0:00";
-//     const mins = Math.floor(seconds / 60);
-//     const secs = Math.floor(seconds % 60);
-//     return `${mins}:${secs.toString().padStart(2, "0")}`;
-//   };
-
-//   const currentLessonIndex = module.lessons.findIndex(
-//     (l) => l.id === lesson.id,
-//   );
-//   const nextLesson = module.lessons[currentLessonIndex + 1];
-
-//   return (
-//     <>
-//       <div className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
-//         <Navbar />
-//       </div>
-
-//       <div className="bg-white min-h-screen pt-24 flex flex-col">
-//         <div className="flex flex-1 px-8 lg:px-16 py-10 gap-12">
-//           {/* SIDEBAR */}
-//           <div className="hidden md:block w-72">
-//             <div className="bg-white border border-gray-200 rounded-xl p-6 max-h-[70vh] overflow-y-auto">
-//               <h2 className="text-lg font-semibold mb-6">{course.title}</h2>
-
-//               <div className="space-y-2">
-//                 {module.lessons.map((l) => (
-//                   <Link
-//                     key={l.id}
-//                     to={`/student-course/${course.id}/${module.id}/${l.id}/learn`}
-//                     className={`block px-4 py-3 rounded-lg text-sm transition ${
-//                       l.id === lesson.id
-//                         ? "bg-gray-200 font-medium"
-//                         : "bg-gray-100 hover:bg-gray-200"
-//                     }`}
-//                   >
-//                     {l.title}
-//                     <div className="text-xs text-gray-500 mt-1">
-//                       {l.duration} min
-//                     </div>
-//                   </Link>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* RIGHT SIDE */}
-//           <div className="flex-1">
-//             <div className="mb-8 border-b pb-4">
-//               <div className="flex items-center justify-between">
-//                 <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-//                 {nextLesson && (
-//                   <Link
-//                     to={`/student-course/${course.id}/${module.id}/${nextLesson.id}/learn`}
-//                     className="text-yellow-500 font-medium"
-//                   >
-//                     Next →
-//                   </Link>
-//                 )}
-//               </div>
-//             </div>
-
-//             {/* VIDEO */}
-//             <div className="flex justify-center">
-//               <div className="w-full max-w-5xl">
-//                 <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-//                   {/* Proper 16:9 Ratio */}
-//                   <div className="relative bg-black aspect-video">
-//                     <video
-//                       ref={videoRef}
-//                       onTimeUpdate={handleTimeUpdate}
-//                       onLoadedMetadata={handleTimeUpdate}
-//                       className="w-full h-full object-contain"
-//                       onClick={togglePlay}
-//                     >
-//                       <source
-//                         src="https://www.w3schools.com/html/mov_bbb.mp4"
-//                         type="video/mp4"
-//                       />
-//                     </video>
-
-//                     {!playing && (
-//                       <button
-//                         onClick={togglePlay}
-//                         className="absolute inset-0 flex items-center justify-center bg-black/20"
-//                       >
-//                         <div className="bg-white rounded-full p-6 shadow-xl">
-//                           <Play className="w-10 h-10 text-gray-900 fill-gray-900" />
-//                         </div>
-//                       </button>
-//                     )}
-//                   </div>
-
-//                   {/* CONTROLS */}
-//                   <div className="px-6 py-4 border-t border-gray-100 bg-white">
-//                     <div className="flex items-center gap-4">
-//                       <button onClick={togglePlay}>
-//                         {playing ? (
-//                           <Pause className="w-5 h-5" />
-//                         ) : (
-//                           <Play className="w-5 h-5 fill-gray-700" />
-//                         )}
-//                       </button>
-
-//                       <Volume2 className="w-5 h-5 text-gray-700" />
-
-//                       <span className="text-sm text-gray-600 min-w-[60px]">
-//                         {formatTime(currentTime)}
-//                       </span>
-
-//                       <div
-//                         className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden cursor-pointer"
-//                         onClick={handleProgressClick}
-//                       >
-//                         <div
-//                           className="bg-yellow-400 h-full"
-//                           style={{ width: `${progress}%` }}
-//                         />
-//                       </div>
-
-//                       <span className="text-sm text-gray-600 min-w-[60px] text-right">
-//                         {formatTime(duration)}
-//                       </span>
-
-//                       <div className="flex items-center gap-3">
-//                         <Download className="w-5 h-5 text-gray-700" />
-//                         <FileText className="w-5 h-5 text-gray-700" />
-//                         <Settings className="w-5 h-5 text-gray-700" />
-//                         <Maximize className="w-5 h-5 text-gray-700" />
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <Footer />
-//       </div>
-//     </>
-//   );
-// };
-
-// export default LessonPlayer;

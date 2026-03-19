@@ -38,6 +38,7 @@ const Login = () => {
       if (data?.success) {
         // ✅ Store token
         localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.user.role);
 
         // ✅ Store user
         localStorage.setItem("user", JSON.stringify(data.user));
